@@ -1,78 +1,67 @@
 /* ============================================================================
-   INDIAN RUPEES → WORDS CONVERTER (Final Production Build)
-   KRISHNA KIDNEY CENTRE — Billing OS (Ceramic V4)
-   ✔ Indian numbering (Crores, Lakhs, Thousands)
-   ✔ Supports Paise
-   ✔ Cleans ₹ symbols & commas
-   ✔ Used by pdf-engine.js as: inrToWords()
+   KRISHNA KIDNEY CENTRE — Amount in Words Engine (FINAL PRODUCTION)
+   Works for:
+   ✔ 0 – 9,99,99,99,999 (99 crore)
+   ✔ Preview modal
+   ✔ PDF export
 ============================================================================ */
 
-function inrToWords(value) {
-    if (value === null || value === undefined || value === "") 
-        return "Zero Rupees Only";
-
-    // Remove ₹, commas, spaces
-    let num = value.toString().replace(/[^0-9.]/g, "");
-
-    if (num === "" || isNaN(num)) return "Zero Rupees Only";
+function amountInWords(num) {
     num = Number(num);
+    if (isNaN(num) || num < 0) return "";
 
-    const integerPart = Math.floor(num);
-    const decimalPart = Math.round((num % 1) * 100);
+    if (num === 0) return "Zero Rupees Only";
 
-    let words = convertIndian(integerPart) + " Rupees";
+    const a = [
+        "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+        "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+        "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+    ];
 
-    if (decimalPart > 0) {
-        words += " and " + convertIndian(decimalPart) + " Paise";
+    const b = [
+        "", "", "Twenty", "Thirty", "Forty", "Fifty",
+        "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function twoDigits(n) {
+        return n < 20 ? a[n] : b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
     }
 
-    return words + " Only";
+    function threeDigits(n) {
+        return n > 99
+            ? a[Math.floor(n / 100)] + " Hundred" + (n % 100 ? " and " + twoDigits(n % 100) : "")
+            : twoDigits(n);
+    }
+
+    let crore = Math.floor(num / 10000000);
+    num %= 10000000;
+
+    let lakh = Math.floor(num / 100000);
+    num %= 100000;
+
+    let thousand = Math.floor(num / 1000);
+    num %= 1000;
+
+    let hundred = Math.floor(num / 100);
+    let rest = num % 100;
+
+    let words = "";
+
+    if (crore) words += threeDigits(crore) + " Crore ";
+    if (lakh) words += threeDigits(lakh) + " Lakh ";
+    if (thousand) words += threeDigits(thousand) + " Thousand ";
+    if (hundred) words += a[hundred] + " Hundred ";
+    if (rest) words += (hundred && rest ? "and " : "") + twoDigits(rest);
+
+    return words.trim() + " Rupees Only";
 }
 
 /* ============================================================================
-   CORE NUMBER → WORDS ENGINE (Indian System)
+   PDF ENGINE COMPATIBILITY ALIAS
 ============================================================================ */
-function convertIndian(num) {
-    const ones = [
-        "Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
-        "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen",
-        "Sixteen","Seventeen","Eighteen","Nineteen"
-    ];
-
-    const tens = [
-        "", "", "Twenty","Thirty","Forty","Fifty",
-        "Sixty","Seventy","Eighty","Ninety"
-    ];
-
-    if (num < 20) return ones[num];
-
-    if (num < 100)
-        return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
-
-    if (num < 1000)
-        return (
-            ones[Math.floor(num / 100)] +
-            " Hundred" +
-            (num % 100 === 0 ? "" : " " + convertIndian(num % 100))
-        );
-
-    if (num < 100000)
-        return (
-            convertIndian(Math.floor(num / 1000)) +
-            " Thousand" +
-            (num % 1000 === 0 ? "" : " " + convertIndian(num % 1000))
-        );
-
-    if (num < 10000000)
-        return (
-            convertIndian(Math.floor(num / 100000)) +
-            " Lakh" +
-            (num % 100000 === 0 ? "" : " " + convertIndian(num % 100000))
-        );
-
-    return (
-        convertIndian(Math.floor(num / 10000000)) +
-        " Crore" +
-        (num % 10000000 === 0 ? "" : " " + convertIndian(num % 10000000))
-    );
+function inrToWords(n) {
+    return amountInWords(n);
 }
+
+window.amountInWords = amountInWords;
+window.inrToWords = inrToWords;
