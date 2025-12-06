@@ -228,12 +228,24 @@
 
   <!-- TOTAL + ACTIONS -->
   <div class="card total-box">
+    <div class="total-meta">
+      <div class="meta-line">
+        <span>Sub Total:</span>
+        <strong id="subTotal">₹0</strong>
+      </div>
+      <div class="meta-line">
+        <span>Discount Applied:</span>
+        <strong id="discountValue">₹0</strong>
+      </div>
+    </div>
+
     <div class="total-line">
       <label>Total Amount:</label>
       <span id="grandTotal">₹0</span>
     </div>
 
     <div class="action-buttons">
+      <button id="loadDemoBill" class="btn ghost">Load Sample Bill</button>
       <button id="saveBill" class="btn primary">Save Bill</button>
       <button id="exportPDF" class="btn">Export as PDF</button>
     </div>
