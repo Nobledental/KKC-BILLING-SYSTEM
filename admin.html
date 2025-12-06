@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="ceramic">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Admin Control Panel — Krishna Kidney Centre</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/admin.css" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" />
+</head>
+
+<body>
+
+<!-- =======================================================================
+     ADMIN WRAPPER
+======================================================================= -->
+<div class="admin-page-wrapper">
+
+  <h1 class="admin-title">Admin Control Panel</h1>
+
+
+  <!-- ============================================================
+       DOCTOR MASTER
+    ============================================================ -->
+  <div class="admin-panel">
+
+    <div class="panel-header">
+      <h2>Doctor Master</h2>
+      <button class="btn-add" onclick="openModal('doctor')">+ Add Doctor</button>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="admin-search-bar">
+      <input type="text" placeholder="Search doctor..." id="searchDoctor" oninput="filterTable('doctor')" />
+      <select id="doctorFilter" onchange="filterTable('doctor')">
+        <option value="">All Departments</option>
+        <option value="Nephrology">Nephrology</option>
+        <option value="Urology">Urology</option>
+        <option value="General Medicine">General Medicine</option>
+      </select>
+    </div>
+
+    <!-- DOCTOR TABLE -->
+    <table class="admin-table" id="doctorTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="doctorTableBody">
+        <!-- Auto-filled by JS -->
+      </tbody>
+    </table>
+
+  </div>
+
+
+
+
+  <!-- ============================================================
+       STAFF MASTER
+    ============================================================ -->
+  <div class="admin-panel">
+
+    <div class="panel-header">
+      <h2>Staff Master</h2>
+      <button class="btn-add" onclick="openModal('staff')">+ Add Staff</button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="admin-search-bar">
+      <input type="text" placeholder="Search staff..." id="searchStaff" oninput="filterTable('staff')" />
+      <select id="staffFilter" onchange="filterTable('staff')">
+        <option value="">All Roles</option>
+        <option value="Receptionist">Receptionist</option>
+        <option value="Nurse">Nurse</option>
+        <option value="Pharmacist">Pharmacist</option>
+        <option value="Accountant">Accountant</option>
+      </select>
+    </div>
+
+    <table class="admin-table" id="staffTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="staffTableBody">
+        <!-- Auto-filled by JS -->
+      </tbody>
+    </table>
+
+  </div>
+
+
+
+
+  <!-- ============================================================
+       DEPARTMENT MASTER
+    ============================================================ -->
+  <div class="admin-panel">
+
+    <div class="panel-header">
+      <h2>Department Master</h2>
+      <button class="btn-add" onclick="openModal('dept')">+ Add Department</button>
+    </div>
+
+    <table class="admin-table" id="deptTable">
+      <thead>
+        <tr>
+          <th>Department Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="deptTableBody">
+        <!-- Auto-filled by JS -->
+      </tbody>
+    </table>
+
+  </div>
+
+
+</div>
+
+
+
+<!-- =======================================================================
+     MODALS (Add / Edit Doctor, Staff, Department)
+======================================================================= -->
+
+<!-- BACKDROP -->
+<div class="admin-modal-backdrop" id="adminModalBackdrop">
+
+  <!-- MODAL -->
+  <div class="admin-modal" id="adminModal">
+
+    <h3 id="modalTitle">Add Item</h3>
+
+    <input type="hidden" id="modalType" />
+    <input type="hidden" id="modalEditIndex" />
+
+    <!-- Name -->
+    <label>Name</label>
+    <input type="text" id="modalName" placeholder="Enter name" />
+
+    <!-- Dynamic field 1 -->
+    <label id="modalField1Label">Field 1</label>
+    <input type="text" id="modalField1" placeholder="Enter value" />
+
+    <!-- Dynamic field 2 -->
+    <label id="modalField2Label" style="display:none;">Field 2</label>
+    <input type="text" id="modalField2" style="display:none;" placeholder="Enter value" />
+
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeAdminModal()">Cancel</button>
+      <button class="btn-save" onclick="saveAdminData()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- =======================================================================
+     JS
+======================================================================= -->
+<script src="assets/js/admin.js"></script>
+
+</body>
+</html>
