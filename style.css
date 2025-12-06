@@ -462,3 +462,93 @@ tbody tr:hover td {
 .active-admin-tab {
   display: block;
 }
+
+/* ============================================================================
+   PDF — Hospital Header Section
+============================================================================ */
+
+.pdf-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.pdf-header-logo {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.pdf-header-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.pdf-hospital-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #003e8a;
+}
+
+.pdf-doctor-block {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+/* ============================================================================
+   PDF — Charges Table (Exact hospital style)
+============================================================================ */
+
+.pdf-table th {
+  background: #003e8a !important;
+  color: #fff !important;
+  font-size: 13px;
+  padding: 6px;
+}
+
+.pdf-table td {
+  font-size: 13px;
+  padding: 6px;
+  border-bottom: 1px solid #cfd8e6;
+}
+
+.pdf-total-row td {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* ============================================================================
+   PAID Stamp (purple)
+============================================================================ */
+.pdf-paid-stamp {
+  position: absolute;
+  right: 40px;
+  top: 280px;
+  font-size: 48px;
+  font-weight: 900;
+  color: rgba(128,0,128,0.35);
+  rotate: -22deg;
+  letter-spacing: 4px;
+  border: 4px solid rgba(128,0,128,0.35);
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   Tamil text support
+============================================================================ */
+@font-face {
+  font-family: "TamilFont";
+  src: url("assets/fonts/Latha.ttf");
+}
+
+.tamil-text {
+  font-family: "TamilFont", sans-serif;
+  font-size: 13px;
+}
