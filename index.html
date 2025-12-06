@@ -367,6 +367,130 @@
 
 </main>
 
+<!-- ============================================================
+     PREMIUM BILL TEMPLATE (Hidden — Used Only for PDF Export)
+     Krishna Kidney Centre — Premium Medical Invoice
+     H3 + T3 + TOT1/TOT3 Hybrid
+============================================================ -->
+<div id="billTemplate" style="display:none;">
+
+  <div class="bill-wrapper">
+
+    <!-- HEADER -->
+    <div class="bill-header">
+      <div class="bill-header-left">
+        <img id="bill_hospital_logo" src="" alt="Hospital Logo" class="bill-logo-large">
+      </div>
+
+      <div class="bill-header-right">
+        <h1 class="bill-hospital-name">Krishna Kidney Centre</h1>
+        <p class="bill-hospital-details">
+          No. 1/375-7, Rayakottai Main Road, Krishnagiri – 635001<br>
+          Phone: 8300224569 / 9442318169<br>
+          Email: bksrinivasan1980@yahoo.co.in
+        </p>
+      </div>
+    </div>
+
+    <!-- GRADIENT LINE -->
+    <div class="bill-header-gradient"></div>
+
+    <!-- BILL INFO -->
+    <div class="bill-meta-grid">
+      <div>
+        <h3>Bill No</h3>
+        <p id="b_billNo"></p>
+      </div>
+      <div>
+        <h3>Date</h3>
+        <p id="b_billDate"></p>
+      </div>
+      <div>
+        <h3>Patient ID</h3>
+        <p id="b_patientID"></p>
+      </div>
+      <div>
+        <h3>Insurance</h3>
+        <p id="b_insurance"></p>
+      </div>
+    </div>
+
+    <!-- PATIENT DETAILS -->
+    <div class="bill-section">
+      <h2>Patient Information</h2>
+
+      <div class="bill-meta-grid">
+        <div>
+          <h3>Name</h3>
+          <p id="b_name"></p>
+        </div>
+        <div>
+          <h3>Age / Gender</h3>
+          <p id="b_ageGender"></p>
+        </div>
+        <div>
+          <h3>Doctor</h3>
+          <p id="b_doctor"></p>
+        </div>
+      </div>
+
+      <div class="bill-meta-grid">
+        <div>
+          <h3>DOA</h3>
+          <p id="b_doa"></p>
+        </div>
+        <div>
+          <h3>DOD</h3>
+          <p id="b_dod"></p>
+        </div>
+        <div>
+          <h3>Admission Time</h3>
+          <p id="b_admTime"></p>
+        </div>
+        <div>
+          <h3>Discharge Time</h3>
+          <p id="b_disTime"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARGES TABLE -->
+    <div class="bill-section">
+      <h2>Charges</h2>
+
+      <table class="bill-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Rate (₹)</th>
+            <th>Qty</th>
+            <th>Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="b_tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="bill-total-box">
+      <div class="bill-total-line bill-total-border">
+        <span>Gross Total</span>
+        <strong id="b_grossTotal"></strong>
+      </div>
+
+      <div class="bill-total-line bill-total-border">
+        <span>Discount</span>
+        <strong id="b_discount"></strong>
+      </div>
+
+      <div class="bill-final">
+        <span>Total Payable</span>
+        <strong id="b_finalTotal"></strong>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
 <!-- ============================================================
