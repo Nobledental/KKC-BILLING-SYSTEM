@@ -449,3 +449,43 @@ function exportPDF() {
 
   doc.save($("bill_no").value + ".pdf");
 }
+
+function importSamplePatient() {
+  const data = {
+    bill_no: "KCC-BILL-160293",
+    patient_id: "KCC-PAT-PRAVEEN",
+    name: "MR.PRAVEEN KUMAR",
+    age: "36",
+    gender: "MALE",
+    doctor: "Dr. B.K. SRINIVASAN",
+    doa: "2025-09-27",
+    dod: "2025-09-28",
+    adm_time: "09:30",
+    dis_time: "12:00",
+    date: "2025-09-28",
+    time: "12:00",
+    insurance: "no",
+    discount_percent: "0",
+    discount_amount: "0",
+    total: "₹160293",
+    charges: [
+      { desc: "SURGEON FEES", rate: "50000", qty: "1" },
+      { desc: "ASSISTANT SURGEON FEES", rate: "16000", qty: "1" },
+      { desc: "DJ STENDING", rate: "12000", qty: "1" },
+      { desc: "ANAESTHESIA FEEES", rate: "16000", qty: "1" },
+      { desc: "ICU CHARGE", rate: "5000", qty: "1" },
+      { desc: "DOCTOR CHARGE", rate: "1200", qty: "3" },
+      { desc: "SPECIALITY DOCTOR ICU VISIT", rate: "1500", qty: "1" },
+      { desc: "BED CHARGE", rate: "1500", qty: "2" },
+      { desc: "NURSING CHARGES", rate: "450", qty: "2" },
+      { desc: "OT CHARGE", rate: "27000", qty: "1" },
+      { desc: "PREANESTHETIC CHECKUP", rate: "1200", qty: "1" },
+      { desc: "MEDICINE CHARGE", rate: "19243", qty: "1" },
+      { desc: "LAB AMOUNT", rate: "4750", qty: "1" }
+    ]
+  };
+
+  const tx = DB.transaction("bills", "readwrite");
+  tx.objectStore("bills").put(data);
+  alert("Sample patient imported ✔");
+}
