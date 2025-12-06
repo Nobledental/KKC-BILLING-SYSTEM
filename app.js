@@ -1,655 +1,394 @@
 /* ============================================================================
-   KRISHNA KIDNEY CENTRE — BILLING OS (Ceramic V4)
-   FINAL PRODUCTION BUILD — OFFLINE STABLE
-   ✔ New Bill reset fixed
-   ✔ Tariff, doctor, staff, settings synced
-   ✔ Counters stable
-   ✔ Load/Edit stable
-   ✔ PDF export stable
+   KCC BILLING OS — MAIN APPLICATION ENGINE (Ceramic V6)
+   Fully Offline | IndexedDB | Billing + Tariff + Admin + Settings
 ============================================================================ */
 
-const $ = (id) => document.getElementById(id);
-const qs = (s) => document.querySelector(s);
-const qsa = (s) => Array.from(document.querySelectorAll(s));
+/* -----------------------------------------------
+   SHORTHAND HELPERS
+----------------------------------------------- */
+const $  = (id) => document.getElementById(id);
+const q  = (sel) => document.querySelector(sel);
+const qa = (sel) => Array.from(document.querySelectorAll(sel));
 
-const INR = (v) => "₹" + Number(v || 0).toLocaleString("en-IN");
-const num = (x) => (isNaN(parseFloat(x)) ? 0 : parseFloat(x));
-
-/* ============================================================================
-   NAVIGATION — FIXED (New Bill auto-reset)
-============================================================================ */
-qsa(".nav-btn").forEach((btn) =>
-  btn.addEventListener("click", () => {
-    qsa(".nav-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    openPage(btn.dataset.target);
-
-    if (btn.dataset.target === "newBillPage") {
-      prepareNewBill();
-    }
-  })
-);
-
+/* -----------------------------------------------
+   PAGE SWITCHER
+----------------------------------------------- */
 function openPage(id) {
-  qsa(".page").forEach((p) => p.classList.remove("active-page"));
-  $(id).classList.add("active-page");
-}
+    qa(".page").forEach(p => p.classList.remove("active-page"));
+    $(id).classList.add("active-page");
 
-/* ============================================================================
-   INDEXEDDB
-============================================================================ */
-let DB;
-const req = indexedDB.open("KCC_Billing_DB_V4", 7);
+    qa(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    qa(".nav-btn").forEach(btn => {
+        if (btn.dataset.target === id) btn.classList.add("active");
+    });
+}
+window.openPage = openPage;
+
+/* -----------------------------------------------
+   INDEXEDDB INITIALIZATION
+----------------------------------------------- */
+let db;
+const DB_NAME = "KCC_Billing_DB_V6";
+const DB_VERSION = 7;
+
+const req = indexedDB.open(DB_NAME, DB_VERSION);
 
 req.onupgradeneeded = (e) => {
-  DB = e.target.result;
+    db = e.target.result;
 
-  if (!DB.objectStoreNames.contains("bills"))
-    DB.createObjectStore("bills", { keyPath: "bill_no" });
+    if (!db.objectStoreNames.contains("bills"))
+        db.createObjectStore("bills", { keyPath: "bill_no" });
 
-  if (!DB.objectStoreNames.contains("tariffs"))
-    DB.createObjectStore("tariffs", { keyPath: "name" });
+    if (!db.objectStoreNames.contains("tariff"))
+        db.createObjectStore("tariff", { keyPath: "id", autoIncrement: true });
 
-  if (!DB.objectStoreNames.contains("settings"))
-    DB.createObjectStore("settings", { keyPath: "id" });
+    if (!db.objectStoreNames.contains("doctors"))
+        db.createObjectStore("doctors", { keyPath: "id", autoIncrement: true });
 
-  if (!DB.objectStoreNames.contains("doctors"))
-    DB.createObjectStore("doctors", { keyPath: "id", autoIncrement: true });
+    if (!db.objectStoreNames.contains("staff"))
+        db.createObjectStore("staff", { keyPath: "id", autoIncrement: true });
 
-  if (!DB.objectStoreNames.contains("staff"))
-    DB.createObjectStore("staff", { keyPath: "id", autoIncrement: true });
+    if (!db.objectStoreNames.contains("roles"))
+        db.createObjectStore("roles", { keyPath: "id", autoIncrement: true });
+
+    if (!db.objectStoreNames.contains("settings"))
+        db.createObjectStore("settings");
 };
 
 req.onsuccess = (e) => {
-  DB = e.target.result;
-
-  preloadHospitalDefaults();
-  preloadDoctorDefaults();
-  preloadTariffDefaults();
-
-  loadSettings();
-  loadTariffList();
-  loadTariffDropdown();
-  loadBillsList();
-  loadDoctorsTable();
-  loadStaffTable();
-
-  prepareNewBill();
+    db = e.target.result;
+    loadTariffSelect();
+    loadBillHistory();
+    loadDoctors();
+    loadStaff();
+    loadRoles();
+    loadHospitalSettings();
 };
 
-/* ============================================================================
-   DEFAULT DATA LOADERS
-============================================================================ */
-
-function preloadHospitalDefaults() {
-  const tx = DB.transaction("settings", "readonly");
-  tx.objectStore("settings").get("hospital").onsuccess = (e) => {
-    if (e.target.result) return;
-
-    DB.transaction("settings", "readwrite")
-      .objectStore("settings")
-      .put({
-        id: "hospital",
-        name: "Krishna Kidney Centre",
-        address:
-          "No.1/375-7, Rayakottai Main Road,\nNear Flyover,\nKrishnagiri - 635001.",
-        phone: "8300224569 / 9442318169",
-        email: "bksrinivasan1980@yahoo.co.in",
-        gst: "",
-        logo: "assets/logo.png"
-      });
-  };
+/* -----------------------------------------------
+   BILL NUMBER GENERATOR
+----------------------------------------------- */
+function generateBillNumber() {
+    return "KCC" + Date.now().toString().slice(-6);
 }
 
-function preloadDoctorDefaults() {
-  const tx = DB.transaction("doctors", "readonly");
-  tx.objectStore("doctors").getAll().onsuccess = (e) => {
-    if (e.target.result.length) return;
-
-    DB.transaction("doctors", "readwrite")
-      .objectStore("doctors")
-      .put({
-        name: "Dr. B.K. SRINIVASAN",
-        specialization: "M.S., M.Ch (Urology)",
-        phone: "8300224569",
-        email: "bksrinivasan1980@yahoo.co.in",
-        reg: "73759"
-      });
-  };
-}
-
-function preloadTariffDefaults() {
-  const tx = DB.transaction("tariffs", "readonly");
-  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
-    if (e.target.result.length) return;
-
-    const defaults = [
-      ["SURGEON FEES", 50000],
-      ["ASSISTANT SURGEON FEES", 16000],
-      ["DJ STENTING", 12000],
-      ["ANAESTHESIA FEES", 16000],
-      ["ICU CHARGE", 5000],
-      ["DOCTOR CHARGE", 1200],
-      ["SPECIALITY DOCTOR ICU VISIT", 1500],
-      ["BED CHARGE", 1500],
-      ["NURSING CHARGES", 450],
-      ["OT CHARGE", 27000],
-      ["PRE-ANAESTHETIC CHECKUP", 1200],
-      ["MEDICINE CHARGE", 19243],
-      ["LAB AMOUNT", 4750]
-    ];
-
-    const store = DB.transaction("tariffs", "readwrite").objectStore("tariffs");
-    defaults.forEach(([name, rate]) => store.put({ name, rate }));
-  };
-}
-
-/* ============================================================================
-   COUNTERS
-============================================================================ */
-
-function nextBillNo(cb) {
-  const key = "bill_counter";
-  const tx = DB.transaction("settings", "readwrite");
-  const store = tx.objectStore("settings");
-
-  store.get(key).onsuccess = (e) => {
-    let x = e.target.result ? e.target.result.value : 1;
-    store.put({ id: key, value: x + 1 });
-    cb(`KCC-${String(x).padStart(5, "0")}`);
-  };
-}
-
-function nextUHID(cb) {
-  const key = "uhid_counter";
-  const tx = DB.transaction("settings", "readwrite");
-  const store = tx.objectStore("settings");
-
-  store.get(key).onsuccess = (e) => {
-    let x = e.target.result ? e.target.result.value : 1;
-    store.put({ id: key, value: x + 1 });
-    cb(`MR-${String(x).padStart(5, "0")}`);
-  };
-}
-
-/* ============================================================================
-   PREPARE NEW BILL — FIXED
-============================================================================ */
+/* -----------------------------------------------
+   PREPARE NEW BILL
+----------------------------------------------- */
 function prepareNewBill() {
-  nextBillNo((id) => ($("bill_no").value = id));
-  nextUHID((id) => ($("patient_id").value = id));
+    $("bill_no").value = generateBillNumber();
 
-  $("bill_date").value = new Date().toISOString().slice(0, 10);
-  $("bill_time").value = new Date().toTimeString().slice(0, 5);
+    const t = new Date();
+    $("bill_date").value = t.toISOString().slice(0, 10);
+    $("bill_time").value = t.toTimeString().slice(0, 5);
 
-  $("p_name").value = "";
-  $("p_age").value = "";
-  $("p_gender").value = "Male";
-  $("p_doctor").value = "";
+    $("patient_id").value = "UH" + Math.floor(Math.random() * 90000 + 10000);
 
-  $("p_doa").value = "";
-  $("p_dod").value = "";
-  $("p_adm_time").value = "";
-  $("p_dis_time").value = "";
+    qa("#chargesTable tbody tr").forEach(tr => tr.remove());
+    calculateTotals();
+}
+window.prepareNewBill = prepareNewBill;
 
-  $("discount_percent").value = 0;
-  $("discount_amount").value = 0;
-  $("insurance_mode").value = "no";
+/* -----------------------------------------------
+   ADD CHARGE ROW
+----------------------------------------------- */
+$("addRowBtn").addEventListener("click", () => addChargeRow());
 
-  qs("#chargesTable tbody").innerHTML = "";
+function addChargeRow(desc = "", rate = 0, qty = 1) {
+    const tbody = $("#chargesTable tbody");
 
-  updateTotals();
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td><input class="desc" value="${desc}"></td>
+        <td><input class="rate" type="number" value="${rate}"></td>
+        <td><input class="qty" type="number" value="${qty}"></td>
+        <td class="lineTotal">₹0</td>
+        <td><button class="delete-row">X</button></td>
+    `;
+
+    tbody.appendChild(tr);
+    updateRowListeners();
+    calculateTotals();
 }
 
-/* ============================================================================
-   CHARGES TABLE
-============================================================================ */
+/* -----------------------------------------------
+   DELETE ROW + INPUT CHANGE WATCHER
+----------------------------------------------- */
+function updateRowListeners() {
+    qa(".delete-row").forEach(btn => {
+        btn.onclick = (e) => {
+            e.target.closest("tr").remove();
+            calculateTotals();
+        };
+    });
 
-$("addRowBtn").onclick = () => addRow();
-
-const tbody = qs("#chargesTable tbody");
-
-function addRow(desc = "", rate = "", qty = 1) {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input class="desc" value="${desc}"></td>
-    <td><input class="rate" type="number" value="${rate}"></td>
-    <td><input class="qty" type="number" value="${qty}"></td>
-    <td class="rowTotal">₹0</td>
-    <td><button class="delete-row">X</button></td>
-  `;
-  tbody.appendChild(tr);
-  updateTotals();
+    qa(".rate, .qty").forEach(inp => {
+        inp.oninput = calculateTotals;
+    });
 }
 
-tbody.addEventListener("input", updateTotals);
-
-tbody.addEventListener("click", (e) => {
-  if (e.target.classList.contains("delete-row")) {
-    e.target.closest("tr").remove();
-    updateTotals();
-  }
-});
-
-/* ============================================================================
-   TOTALS
-============================================================================ */
-
-["discount_percent", "discount_amount"].forEach((id) =>
-  $(id).addEventListener("input", updateTotals)
-);
-
+/* -----------------------------------------------
+   TOTAL CALCULATION
+----------------------------------------------- */
 function calculateTotals() {
-  let gross = 0;
+    let subtotal = 0;
 
-  qsa("#chargesTable tbody tr").forEach((row) => {
-    const r = num(row.querySelector(".rate").value);
-    const q = num(row.querySelector(".qty").value);
-    const t = r * q;
+    qa("#chargesTable tbody tr").forEach(tr => {
+        const rate = Number(tr.querySelector(".rate").value);
+        const qty  = Number(tr.querySelector(".qty").value);
+        const total = rate * qty;
 
-    row.querySelector(".rowTotal").textContent = INR(t);
-    gross += t;
-  });
+        tr.querySelector(".lineTotal").textContent = "₹" + total.toLocaleString("en-IN");
 
-  let dP = num($("discount_percent").value);
-  let dA = num($("discount_amount").value);
-
-  if (dP > 0) {
-    dA = (gross * dP) / 100;
-    $("discount_amount").value = dA.toFixed(0);
-  }
-
-  return {
-    gross,
-    dA,
-    final: Math.max(gross - dA, 0)
-  };
-}
-
-function updateTotals() {
-  const t = calculateTotals();
-  $("subTotal").textContent = INR(t.gross);
-  $("discountValue").textContent = t.dA > 0 ? "-" + INR(t.dA) : INR(0);
-  $("grandTotal").textContent = INR(t.final);
-}
-
-/* ============================================================================
-   TARIFF MASTER
-============================================================================ */
-
-$("saveTariff").onclick = saveTariff;
-
-function saveTariff() {
-  const name = $("tariff_name").value.trim();
-  const rate = num($("tariff_rate").value);
-  if (!name || !rate) return alert("Enter Tariff Name & Rate");
-
-  DB.transaction("tariffs", "readwrite")
-    .objectStore("tariffs")
-    .put({ name, rate });
-
-  $("tariff_name").value = "";
-  $("tariff_rate").value = "";
-  loadTariffList();
-}
-
-function loadTariffList() {
-  const tx = DB.transaction("tariffs", "readonly");
-  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
-    const table = $("tariffTable").querySelector("tbody");
-    table.innerHTML = "";
-
-    e.target.result.forEach((t) => {
-      table.innerHTML += `
-        <tr>
-          <td>${t.name}</td>
-          <td>${INR(t.rate)}</td>
-          <td><button class="delete-row" onclick="deleteTariff('${t.name}')">Delete</button></td>
-        </tr>
-      `;
+        subtotal += total;
     });
 
-    loadTariffDropdown();
-  };
+    $("subTotal").textContent = "₹" + subtotal.toLocaleString("en-IN");
+
+    const discountPercent = Number($("discount_percent").value);
+    const discountAmount = Number($("discount_amount").value);
+
+    let appliedDiscount = 0;
+
+    if (discountAmount > 0) {
+        appliedDiscount = discountAmount;
+    } else {
+        appliedDiscount = Math.round(subtotal * (discountPercent / 100));
+    }
+
+    $("discountValue").textContent = "₹" + appliedDiscount.toLocaleString("en-IN");
+
+    const grand = subtotal - appliedDiscount;
+
+    $("grandTotal").textContent = "₹" + grand.toLocaleString("en-IN");
 }
-
-function deleteTariff(name) {
-  DB.transaction("tariffs", "readwrite")
-    .objectStore("tariffs")
-    .delete(name);
-
-  loadTariffList();
-}
-
-function loadTariffDropdown() {
-  const sel = $("procedureSelect");
-  sel.innerHTML = `<option value="">Select Procedure</option>`;
-
-  const tx = DB.transaction("tariffs", "readonly");
-  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
-    e.target.result.forEach((t) => {
-      const opt = document.createElement("option");
-      opt.value = t.name;
-      opt.textContent = t.name;
-      sel.appendChild(opt);
-    });
-  };
-}
-
-$("procedureSelect").onchange = () => {
-  const name = $("procedureSelect").value;
-  if (!name) return;
-
-  DB.transaction("tariffs", "readonly")
-    .objectStore("tariffs")
-    .get(name).onsuccess = (e) => {
-      addRow(name, e.target.result.rate, 1);
-    };
-};
-
-/* ============================================================================
-   SAVE BILL
-============================================================================ */
-
-$("saveBill").onclick = saveBill;
-
-function saveBill() {
-  updateTotals();
-
-  const charges = qsa("#chargesTable tbody tr").map((r) => ({
-    desc: r.querySelector(".desc").value,
-    rate: r.querySelector(".rate").value,
-    qty: r.querySelector(".qty").value
-  }));
-
-  const bill = {
-    bill_no: $("bill_no").value,
-    patient_id: $("patient_id").value,
-    name: $("p_name").value,
-    age: $("p_age").value,
-    gender: $("p_gender").value,
-    doctor: $("p_doctor").value,
-
-    doa: $("p_doa").value,
-    dod: $("p_dod").value,
-    adm: $("p_adm_time").value,
-    dis: $("p_dis_time").value,
-
-    date: $("bill_date").value,
-    time: $("bill_time").value,
-
-    discount_percent: $("discount_percent").value,
-    discount_amount: $("discount_amount").value,
-    insurance: $("insurance_mode").value,
-
-    total: $("grandTotal").textContent,
-    charges
-  };
-
-  DB.transaction("bills", "readwrite")
-    .objectStore("bills")
-    .put(bill);
-
-  alert("Bill saved successfully.");
-  loadBillsList();
-}
-
-/* ============================================================================
-   BILL HISTORY
-============================================================================ */
-
-function loadBillsList() {
-  DB.transaction("bills", "readonly")
-    .objectStore("bills")
-    .getAll().onsuccess = (e) => {
-      const table = $("billsTable").querySelector("tbody");
-      table.innerHTML = "";
-
-      e.target.result.forEach((b) => {
-        table.innerHTML += `
-          <tr>
-            <td>${b.bill_no}</td>
-            <td>${b.patient_id}</td>
-            <td>${b.name}</td>
-            <td>${b.date}</td>
-            <td>${b.total}</td>
-            <td>
-              <button class="btn" onclick="openBill('${b.bill_no}')">Open</button>
-            </td>
-          </tr>
-        `;
-      });
-    };
-}
-
-function openBill(id) {
-  DB.transaction("bills", "readonly")
-    .objectStore("bills")
-    .get(id).onsuccess = (e) => {
-      const b = e.target.result;
-      if (!b) return;
-
-      openPage("newBillPage");
-
-      $("bill_no").value      = b.bill_no;
-      $("patient_id").value   = b.patient_id;
-      $("p_name").value       = b.name;
-      $("p_age").value        = b.age;
-      $("p_gender").value     = b.gender;
-      $("p_doctor").value     = b.doctor;
-
-      $("p_doa").value        = b.doa;
-      $("p_dod").value        = b.dod;
-      $("p_adm_time").value   = b.adm;
-      $("p_dis_time").value   = b.dis;
-
-      $("bill_date").value    = b.date;
-      $("bill_time").value    = b.time;
-
-      $("discount_percent").value = b.discount_percent;
-      $("discount_amount").value  = b.discount_amount;
-      $("insurance_mode").value   = b.insurance;
-
-      tbody.innerHTML = "";
-      b.charges.forEach((c) => addRow(c.desc, c.rate, c.qty));
-
-      updateTotals();
-    };
-}
-
-/* ============================================================================
-   DOCTOR MASTER
-============================================================================ */
-
-$("saveDoctor").onclick = () => {
-  const doc = {
-    name: $("doc_name").value,
-    specialization: $("doc_specialization").value,
-    phone: $("doc_phone").value,
-    email: $("doc_email").value
-  };
-
-  DB.transaction("doctors", "readwrite")
-    .objectStore("doctors")
-    .put(doc);
-
-  loadDoctorsTable();
-  alert("Doctor saved.");
-};
-
-function loadDoctorsTable() {
-  DB.transaction("doctors", "readonly")
-    .objectStore("doctors")
-    .getAll().onsuccess = (e) => {
-      const table = $("doctorTable").querySelector("tbody");
-      table.innerHTML = "";
-
-      e.target.result.forEach((d) => {
-        table.innerHTML += `
-          <tr>
-            <td>${d.name}</td>
-            <td>${d.specialization}</td>
-            <td>${d.phone}</td>
-            <td>${d.email}</td>
-            <td></td>
-          </tr>
-        `;
-      });
-    };
-}
-
-/* ============================================================================
-   STAFF MASTER
-============================================================================ */
-
-$("saveStaff").onclick = () => {
-  const st = {
-    name: $("staff_name").value,
-    role: $("staff_role").value,
-    phone: $("staff_phone").value,
-    email: $("staff_email").value
-  };
-
-  DB.transaction("staff", "readwrite")
-    .objectStore("staff")
-    .put(st);
-
-  loadStaffTable();
-  alert("Staff saved.");
-};
-
-function loadStaffTable() {
-  DB.transaction("staff", "readonly")
-    .objectStore("staff")
-    .getAll().onsuccess = (e) => {
-      const table = $("staffTable").querySelector("tbody");
-      table.innerHTML = "";
-
-      e.target.result.forEach((s) => {
-        table.innerHTML += `
-          <tr>
-            <td>${s.name}</td>
-            <td>${s.role}</td>
-            <td>${s.phone}</td>
-            <td>${s.email}</td>
-            <td></td>
-          </tr>
-        `;
-      });
-    };
-}
-
-/* ============================================================================
-   SETTINGS
-============================================================================ */
-
-$("saveSettings").onclick = saveSettings;
-
-function saveSettings() {
-  const d = {
-    id: "hospital",
-    name: $("set_h_name").value,
-    address: $("set_h_address").value,
-    phone: $("set_h_phone").value,
-    email: $("set_h_email").value,
-    gst: $("set_h_gst").value
-  };
-
-  const file = $("set_h_logo").files[0];
-  if (file) {
-    const r = new FileReader();
-    r.onload = () => {
-      d.logo = r.result;
-      saveSettingsFinal(d);
-    };
-    r.readAsDataURL(file);
-  } else {
-    saveSettingsFinal(d);
-  }
-}
-
-function saveSettingsFinal(d) {
-  DB.transaction("settings", "readwrite")
-    .objectStore("settings")
-    .put(d);
-
-  alert("Settings Updated");
-}
-
-function loadSettings() {
-  DB.transaction("settings", "readonly")
-    .objectStore("settings")
-    .get("hospital").onsuccess = (e) => {
-      const s = e.target.result || {};
-
-      $("set_h_name").value = s.name || "";
-      $("set_h_address").value = s.address || "";
-      $("set_h_phone").value = s.phone || "";
-      $("set_h_email").value = s.email || "";
-      $("set_h_gst").value = s.gst || "";
-    };
-}
-
-/* ============================================================================
-   DEMO BILL
-============================================================================ */
-
-$("loadDemoBill").onclick = () => {
-  openPage("newBillPage");
-
-  $("p_name").value = "Mr. Praveen Kumar";
-  $("p_age").value = "46";
-  $("p_gender").value = "Male";
-  $("p_doctor").value = "Dr. B.K. SRINIVASAN";
-
-  $("p_doa").value = "2025-09-27";
-  $("p_dod").value = "2025-09-28";
-  $("p_adm_time").value = "09:30";
-  $("p_dis_time").value = "12:00";
-
-  tbody.innerHTML = "";
-
-  const list = [
-    ["SURGEON FEES", 50000, 1],
-    ["ASSISTANT SURGEON FEES", 16000, 1],
-    ["DJ STENTING", 12000, 1],
-    ["ANAESTHESIA FEES", 16000, 1],
-    ["ICU CHARGE", 5000, 1],
-    ["DOCTOR CHARGE", 1200, 3],
-    ["SPECIALITY DOCTOR ICU VISIT", 1500, 1],
-    ["BED CHARGE", 1500, 2],
-    ["NURSING CHARGES", 450, 2],
-    ["OT CHARGE", 27000, 1],
-    ["PRE-ANAESTHETIC CHECKUP", 1200, 1],
-    ["MEDICINE CHARGE", 19243, 1],
-    ["LAB AMOUNT", 4750, 1]
-  ];
-
-  list.forEach((i) => addRow(i[0], i[1], i[2]));
-
-  updateTotals();
-};
-
-/* ============================================================================
-   PDF EXPORT HOOK
-============================================================================ */
-$("exportPDF").onclick = () => exportPremiumPDF();
-
-/* ============================================================================
-   ADMIN TAB SWITCHING
-============================================================================ */
-
-document.querySelectorAll(".admin-tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    document
-      .querySelectorAll(".admin-tab")
-      .forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
-
-    document
-      .querySelectorAll(".admin-tab-content")
-      .forEach((box) => box.classList.remove("active-admin-tab"));
-
-    $(tab.dataset.adminTarget).classList.add("active-admin-tab");
-  });
+qa("#discount_percent, #discount_amount").forEach(inp => {
+    inp.addEventListener("input", calculateTotals);
 });
+
+/* -----------------------------------------------
+   SAVE BILL
+----------------------------------------------- */
+$("saveBill").onclick = () => {
+    const bill = collectBillData();
+    const tx = db.transaction("bills", "readwrite");
+    tx.objectStore("bills").put(bill);
+
+    tx.oncomplete = () => {
+        alert("Bill Saved Successfully");
+        loadBillHistory();
+        openPage("billsPage");
+    };
+};
+
+/* -----------------------------------------------
+   LOAD BILL HISTORY
+----------------------------------------------- */
+function loadBillHistory() {
+    const tbody = $("#billsTable tbody");
+    tbody.innerHTML = "";
+
+    const tx = db.transaction("bills", "readonly");
+    tx.objectStore("bills").getAll().onsuccess = (e) => {
+        e.target.result.sort((a,b) => b.bill_no.localeCompare(a.bill_no));
+        e.target.result.forEach(bill => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${bill.bill_no}</td>
+                <td>${bill.patient_id}</td>
+                <td>${bill.name}</td>
+                <td>${bill.date}</td>
+                <td>${bill.total}</td>
+                <td>
+                    <button class="btn" onclick="loadBillPreview('${bill.bill_no}')">View</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+}
+
+window.loadBillPreview = function (billNo) {
+    const tx = db.transaction("bills", "readonly");
+    tx.objectStore("bills").get(billNo).onsuccess = (e) => {
+        const bill = e.target.result;
+        populatePreviewTemplate(bill);
+        buildPreviewModal();
+    };
+};
+
+/* -----------------------------------------------
+   TARIFF MASTER
+----------------------------------------------- */
+function loadTariffSelect() {
+    const select = $("procedureSelect");
+    select.innerHTML = `<option value="">Select Tariff</option>`;
+
+    const tx = db.transaction("tariff", "readonly");
+    tx.objectStore("tariff").getAll().onsuccess = (e) => {
+        e.target.result.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t.desc;
+            opt.textContent = t.desc;
+            select.appendChild(opt);
+        });
+    };
+
+    select.onchange = () => {
+        const desc = select.value;
+        if (!desc) return;
+
+        const tx = db.transaction("tariff", "readonly");
+        tx.objectStore("tariff").getAll().onsuccess = (e) => {
+            const row = e.target.result.find(x => x.desc === desc);
+            if (row) addChargeRow(row.desc, row.rate, 1);
+            calculateTotals();
+        };
+    };
+}
+
+/* -----------------------------------------------
+   DOCTORS
+----------------------------------------------- */
+$("saveDoctor").onclick = () => {
+    const doc = {
+        name: $("doc_name").value,
+        specialization: $("doc_specialization").value,
+        phone: $("doc_phone").value,
+        email: $("doc_email").value
+    };
+
+    db.transaction("doctors", "readwrite")
+      .objectStore("doctors")
+      .add(doc).oncomplete = loadDoctors;
+};
+
+function loadDoctors() {
+    const tbody = $("#doctorTable tbody");
+    tbody.innerHTML = "";
+
+    db.transaction("doctors", "readonly")
+      .objectStore("doctors")
+      .getAll().onsuccess = (e) => {
+        e.target.result.forEach(d => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${d.name}</td>
+                <td>${d.specialization}</td>
+                <td>${d.phone}</td>
+                <td>${d.email}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+}
+
+/* -----------------------------------------------
+   STAFF
+----------------------------------------------- */
+$("saveStaff").onclick = () => {
+    const st = {
+        name: $("staff_name").value,
+        role: $("staff_role").value,
+        phone: $("staff_phone").value,
+        email: $("staff_email").value
+    };
+
+    db.transaction("staff", "readwrite")
+      .objectStore("staff")
+      .add(st).oncomplete = loadStaff;
+};
+
+function loadStaff() {
+    const tbody = $("#staffTable tbody");
+    tbody.innerHTML = "";
+
+    db.transaction("staff", "readonly")
+      .objectStore("staff")
+      .getAll().onsuccess = (e) => {
+        e.target.result.forEach(s => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${s.name}</td>
+                <td>${s.role}</td>
+                <td>${s.phone}</td>
+                <td>${s.email}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+}
+
+/* -----------------------------------------------
+   ROLES
+----------------------------------------------- */
+$("saveRole").onclick = () => {
+    const checked = qa(".permissions-box input:checked")
+        .map(cb => cb.value);
+
+    db.transaction("roles", "readwrite")
+      .objectStore("roles")
+      .add({
+          name: $("role_name").value,
+          permissions: checked
+      }).oncomplete = loadRoles;
+};
+
+function loadRoles() {
+    const tbody = $("#rolesTable tbody");
+    tbody.innerHTML = "";
+
+    db.transaction("roles", "readonly")
+      .objectStore("roles")
+      .getAll().onsuccess = (e) => {
+        e.target.result.forEach(r => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${r.name}</td>
+                <td>${r.permissions.join(", ")}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+}
+
+/* -----------------------------------------------
+   HOSPITAL SETTINGS
+----------------------------------------------- */
+$("saveSettings").onclick = () => {
+    const reader = new FileReader();
+    const file = $("set_h_logo").files[0];
+
+    reader.onload = () => {
+        const obj = {
+            name: $("set_h_name").value,
+            address: $("set_h_address").value,
+            phone: $("set_h_phone").value,
+            email: $("set_h_email").value,
+            gst: $("set_h_gst").value,
+            logo: reader.result || ""
+        };
+
+        db.transaction("settings", "readwrite")
+          .objectStore("settings")
+          .put(obj, "hospital").oncomplete = () => {
+            alert("Settings Saved");
+          };
+    };
+
+    if (file) reader.readAsDataURL(file);
+    else reader.onload();
+};
+
+function loadHospitalSettings() {
+    const tx = db.transaction("settings", "readonly");
+    tx.objectStore("settings").get("hospital").onsuccess = (e) => {
+        const s = e.target.result || {};
+        $("set_h_name").value = s.name || "";
+        $("set_h_address").value = s.address || "";
+        $("set_h_phone").value = s.phone || "";
+        $("set_h_email").value = s.email || "";
+        $("set_h_gst").value = s.gst || "";
+    };
+}
