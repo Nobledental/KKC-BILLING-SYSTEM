@@ -10,11 +10,9 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- PDF PREVIEW CSS -->
   <link rel="stylesheet" href="pdf/preview.css" />
 
-  <!-- VENDOR SCRIPTS OFFLINE -->
+  <!-- PDF LIBRARIES (OFFLINE) -->
   <script src="vendor/html2canvas.min.js"></script>
   <script src="vendor/jspdf.umd.min.js"></script>
   <script src="vendor/jspdf.autotable.min.js"></script>
@@ -48,9 +46,7 @@
 ============================================================ -->
 <main class="main-shell">
 
-<!-- ============================================================
-     DASHBOARD
-============================================================ -->
+<!-- ================================ DASHBOARD ================================ -->
 <section id="dashboardPage" class="page active-page floating-panel">
   <h1>Dashboard</h1>
 
@@ -62,7 +58,7 @@
     </div>
 
     <div class="dash-card">
-      <h3>Bill History</hh3>
+      <h3>Bill History</h3>
       <p>View previous bills</p>
       <button class="btn" onclick="openPage('billsPage')">Open →</button>
     </div>
@@ -75,19 +71,16 @@
 
     <div class="dash-card">
       <h3>Hospital Settings</h3>
-      <p>Configure details</p>
+      <p>Configure hospital details</p>
       <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
   </div>
 </section>
 
-<!-- ============================================================
-     NEW BILL PAGE
-============================================================ -->
+<!-- ================================ NEW BILL PAGE ================================ -->
 <section id="newBillPage" class="page floating-panel">
   <h1>New Bill</h1>
 
-  <!-- BILL INFO -->
   <div class="card">
     <h2>Bill Information</h2>
     <div class="grid-3">
@@ -97,7 +90,6 @@
     </div>
   </div>
 
-  <!-- PATIENT INFO -->
   <div class="card">
     <h2>Patient Information</h2>
 
@@ -105,7 +97,9 @@
       <div><label>UHID</label><input id="patient_id" disabled></div>
       <div><label>Patient Name</label><input id="p_name"></div>
       <div><label>Age</label><input id="p_age" type="number"></div>
-      <div><label>Gender</label><select id="p_gender"><option>Male</option><option>Female</option></select></div>
+      <div><label>Gender</label>
+        <select id="p_gender"><option>Male</option><option>Female</option></select>
+      </div>
       <div><label>Doctor Name</label><input id="p_doctor"></div>
     </div>
 
@@ -120,11 +114,9 @@
     </div>
   </div>
 
-  <!-- CHARGES TABLE -->
   <div class="card">
     <div class="table-header">
       <h2>Charges</h2>
-
       <div class="table-actions">
         <select id="procedureSelect"><option value="">Select Tariff</option></select>
         <button id="addRowBtn" class="btn">+ Add Item</button>
@@ -133,25 +125,23 @@
 
     <table id="chargesTable">
       <thead>
-        <tr>
-          <th>Description</th><th>Rate</th><th>Qty</th><th>Total</th><th></th>
-        </tr>
+        <tr><th>Description</th><th>Rate</th><th>Qty</th><th>Total</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <!-- DISCOUNT -->
   <div class="card">
     <h2>Discount</h2>
     <div class="grid-3">
       <div><label>Discount (%)</label><input id="discount_percent" type="number" value="0"></div>
       <div><label>Discount (₹)</label><input id="discount_amount" type="number" value="0"></div>
-      <div><label>Insurance</label><select id="insurance_mode"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <div><label>Insurance</label>
+        <select id="insurance_mode"><option value="no">No</option><option value="yes">Yes</option></select>
+      </div>
     </div>
   </div>
 
-  <!-- TOTAL BOX -->
   <div class="card total-box">
     <div class="total-meta">
       <div class="meta-line"><span>Sub Total:</span><strong id="subTotal">₹0</strong></div>
@@ -167,12 +157,9 @@
       <button class="btn primary" onclick="exportPremiumPDF()">Download PDF</button>
     </div>
   </div>
-
 </section>
 
-<!-- ============================================================
-     BILL HISTORY
-============================================================ -->
+<!-- ================================ BILL HISTORY ================================ -->
 <section id="billsPage" class="page floating-panel">
   <h1>Bill History</h1>
   <div class="card">
@@ -185,9 +172,7 @@
   </div>
 </section>
 
-<!-- ============================================================
-     ADMIN PANEL (Doctors / Staff / Roles)
-============================================================ -->
+<!-- ================================ ADMIN PANEL ================================ -->
 <section id="adminPage" class="page floating-panel">
   <h1>Admin Panel</h1>
 
@@ -197,11 +182,9 @@
     <button class="admin-tab" data-admin-target="rolesTab">Roles</button>
   </div>
 
-  <!-- DOCTORS TAB -->
   <div id="doctorsTab" class="admin-tab-content active-admin-tab">
     <div class="card">
       <h2>Add / Edit Doctor</h2>
-
       <div class="grid-2">
         <div><label>Doctor Name</label><input id="doc_name"></div>
         <div><label>Specialization</label><input id="doc_specialization"></div>
@@ -211,7 +194,6 @@
         <div><label>Phone</label><input id="doc_phone"></div>
         <div><label>Email</label><input id="doc_email"></div>
       </div>
-
       <button id="saveDoctor" class="btn primary" style="margin-top:20px;">Save Doctor</button>
     </div>
 
@@ -224,11 +206,9 @@
     </div>
   </div>
 
-  <!-- STAFF TAB -->
   <div id="staffTab" class="admin-tab-content">
     <div class="card">
       <h2>Add / Edit Staff</h2>
-
       <div class="grid-2">
         <div><label>Name</label><input id="staff_name"></div>
         <div><label>Role</label><select id="staff_role"></select></div>
@@ -251,7 +231,6 @@
     </div>
   </div>
 
-  <!-- ROLES TAB -->
   <div id="rolesTab" class="admin-tab-content">
     <div class="card">
       <h2>Create Role</h2>
@@ -280,12 +259,9 @@
       </table>
     </div>
   </div>
-
 </section>
 
-<!-- ============================================================
-     HOSPITAL SETTINGS
-============================================================ -->
+<!-- ================================ SETTINGS ================================ -->
 <section id="settingsPage" class="page floating-panel">
   <h1>Hospital Settings</h1>
 
@@ -317,269 +293,26 @@
 </main>
 
 <!-- ============================================================
-     PDF PREVIEW MODAL (IFRAME)
+     PREVIEW MODAL
 ============================================================ -->
-<div id="billPreviewModal" class="preview-overlay">
-  <div class="preview-container">
-    
-    <div class="preview-header">
-      <h2>Bill Preview</h2>
-      <button id="closePreview" class="close-btn">✕</button>
-    </div>
-
-    <iframe id="billPreviewFrame" class="preview-frame"></iframe>
-
-    <div class="preview-actions">
-      <button id="downloadPdfBtn" onclick="exportPremiumPDF()" class="btn primary">Download PDF</button>
-      <button id="closePreview2" class="btn ghost">Close</button>
-    </div>
-
-  </div>
-</div>
+<div id="previewModal" style="display:none"></div>
 
 <!-- ============================================================
-     BILL TEMPLATE (INLINE)
+     TEMPLATE — BILL DESIGN INSIDE TEMPLATE TAG
 ============================================================ -->
 <template id="billTemplate">
-  <!-- paste your entire bill-template.html here EXACTLY -->
-  <!-- *** VERY IMPORTANT *** -->
-  <!-- must remain inside template -->
-  <!-- must not be modified -->
-YOUR BILL TEMPLATE HTML GOES HERE
+
+    <!-- Entire bill-wrapper HTML goes here EXACTLY -->
+    <!-- This will be injected by preview-engine.js -->
+
+    <!-- ================= BILL TEMPLATE START ================= -->
+
+    <!-- (I will include the full bill-wrapper in next message) -->
+
 </template>
 
-<!-- ============================================================================
-     PREMIUM BILL TEMPLATE — KRISHNA KIDNEY CENTRE
-     FINAL PRODUCTION VERSION — DO NOT MODIFY IDs
-     Used only inside preview modal + PDF render
-============================================================================ -->
-
-<div class="bill-wrapper" style="
-    width: 100%;
-    padding: 40px;
-    font-family: 'Manrope', sans-serif;
-    color: #0b1a33;
-">
-
-    <!-- ========================= HEADER ========================= -->
-    <div class="bill-header" style="display:flex; justify-content:space-between;">
-        
-        <!-- LEFT: LOGO -->
-        <div>
-            <img id="tpl_h_logo" src="assets/logo.png" style="width:150px;">
-        </div>
-
-        <!-- RIGHT: HOSPITAL DETAILS -->
-        <div style="text-align:right;">
-            <h1 style="
-                font-size:28px;
-                font-weight:800;
-                color:#003e8a;
-                margin-bottom:8px;
-            ">
-                Krishna Kidney Centre
-            </h1>
-
-            <p style="font-size:14px; line-height:1.45; color:#445069;">
-                No. 1/375-7, Rayakottai Main Road, Krishnagiri – 635001<br>
-                Phone: 8300224569 / 9442318169<br>
-                Email: bksrinivasan1980@yahoo.co.in
-            </p>
-        </div>
-    </div>
-
-    <!-- BLUE GRADIENT LINE -->
-    <div style="
-        width:100%;
-        height:6px;
-        margin:20px 0 30px;
-        background:linear-gradient(to right, #1ba7a5, #003e8a);
-        border-radius:4px;
-    "></div>
-
-
-    <!-- ========================= BILL META ========================= -->
-    <div class="bill-meta-grid" style="
-        display:grid;
-        grid-template-columns:repeat(4,1fr);
-        gap:20px;
-        margin-bottom:25px;
-    ">
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px; margin-bottom:3px;">Bill No</h3>
-            <p id="tpl_billNo" style="font-size:15px;"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px; margin-bottom:3px;">Date</h3>
-            <p id="tpl_billDate" style="font-size:15px;"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px; margin-bottom:3px;">Patient ID</h3>
-            <p id="tpl_patientID" style="font-size:15px;"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px; margin-bottom:3px;">Insurance</h3>
-            <p id="tpl_insurance" style="font-size:15px;"></p>
-        </div>
-
-    </div>
-
-
-    <!-- ========================= PATIENT DETAILS ========================= -->
-    <h2 style="
-        font-size:18px;
-        font-weight:700;
-        color:#003e8a;
-        margin-bottom:12px;
-    ">Patient Information</h2>
-
-    <div class="bill-meta-grid" style="
-        display:grid;
-        grid-template-columns:repeat(4,1fr);
-        gap:20px;
-        margin-bottom:20px;
-    ">
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Name</h3>
-            <p id="tpl_name"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Age / Gender</h3>
-            <p id="tpl_ageGender"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Doctor</h3>
-            <p id="tpl_doctor"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Address</h3>
-            <p id="tpl_address"></p>
-        </div>
-    </div>
-
-    <div class="bill-meta-grid" style="
-        display:grid;
-        grid-template-columns:repeat(4,1fr);
-        gap:20px;
-        margin-bottom:25px;
-    ">
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">DOA</h3>
-            <p id="tpl_doa"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">DOD</h3>
-            <p id="tpl_dod"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Admission Time</h3>
-            <p id="tpl_admTime"></p>
-        </div>
-
-        <div>
-            <h3 style="color:#1ba7a5; font-size:14px;">Discharge Time</h3>
-            <p id="tpl_disTime"></p>
-        </div>
-    </div>
-
-
-    <!-- ========================= CHARGES TABLE ========================= -->
-    <h2 style="
-        font-size:18px;
-        font-weight:700;
-        color:#003e8a;
-        margin-bottom:12px;
-    ">Charges</h2>
-
-    <table style="width:100%; border-collapse:collapse;">
-        <thead>
-            <tr style="background:#eef6ff;">
-                <th style="padding:12px; border-bottom:2px solid #d4e7ff; color:#003e8a; text-align:left;">Description</th>
-                <th style="padding:12px; border-bottom:2px solid #d4e7ff; color:#003e8a;">Rate</th>
-                <th style="padding:12px; border-bottom:2px solid #d4e7ff; color:#003e8a;">Qty</th>
-                <th style="padding:12px; border-bottom:2px solid #d4e7ff; color:#003e8a;">Amount</th>
-                <th style="padding:12px; border-bottom:2px solid #d4e7ff; color:#003e8a;">HSN</th>
-            </tr>
-        </thead>
-
-        <tbody id="tpl_tableBody"></tbody>
-    </table>
-
-
-    <!-- ========================= TOTAL BOX ========================= -->
-    <div style="
-        margin-top:30px;
-        background:#fff;
-        border:1px solid #d0ecf0;
-        padding:20px;
-        border-radius:12px;
-    ">
-
-        <div style="display:flex; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid #dceaf3;">
-            <span style="color:#003e8a; font-weight:700;">Gross Total</span>
-            <span id="tpl_grossTotal" style="font-weight:700;"></span>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #dceaf3;">
-            <span style="color:#003e8a; font-weight:700;">Discount</span>
-            <span id="tpl_discount" style="font-weight:700;"></span>
-        </div>
-
-        <div style="
-            margin-top:18px;
-            display:flex;
-            justify-content:space-between;
-            padding:14px 18px;
-            border-radius:12px;
-            background:rgba(27,167,165,0.1);
-            border:1px solid #1ba7a5;
-            font-size:20px;
-            color:#003e8a;
-            font-weight:800;
-        ">
-            <span>Total Payable</span>
-            <span id="tpl_finalTotal"></span>
-        </div>
-
-    </div>
-
-    <!-- ========================= AMOUNT IN WORDS ========================= -->
-    <div style="margin-top:20px;">
-        <h3 style="color:#003e8a; margin-bottom:6px;">Amount in Words</h3>
-        <p id="tpl_amountWords" style="font-weight:600;"></p>
-    </div>
-
-    <!-- ========================= SIGNATURES ========================= -->
-    <div style="margin-top:50px; display:flex; justify-content:space-between;">
-        <div style="text-align:center;">
-            <hr style="width:180px;">
-            <p style="font-size:14px;">Authorized Signature</p>
-        </div>
-
-        <div style="text-align:center;">
-            <hr style="width:180px;">
-            <p style="font-size:14px;">Patient Signature</p>
-        </div>
-    </div>
-
-    <!-- ========================= FOOTER ========================= -->
-    <div style="text-align:center; margin-top:30px; font-size:12px; color:#888;">
-        Powered by HealthFlo OS — AI Billing Engine
-    </div>
-
-</div>
-
 <!-- ============================================================
-     JS ENGINE
+     SCRIPTS
 ============================================================ -->
 <script src="app.js"></script>
 <script src="pdf/amount-in-words.js"></script>
