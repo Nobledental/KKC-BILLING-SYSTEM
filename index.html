@@ -15,7 +15,6 @@
   <script src="vendor/jspdf.umd.min.js"></script>
   <script src="vendor/jspdf.autotable.min.js"></script>
   <script src="vendor/html2canvas.min.js"></script>
-
 </head>
 <body>
 
@@ -36,16 +35,13 @@
     <button class="nav-btn" data-target="billsPage">📁 Bill History</button>
     <button class="nav-btn" data-target="settingsPage">🏥 Hospital Settings</button>
     <button class="nav-btn" data-target="adminPage">🛡️ Admin Panel</button>
-    <button class="nav-btn admin-btn" onclick="window.location.href='admin.html'">🔐 Admin Portal</button>
   </nav>
 </aside>
 
-
 <!-- ============================================================
-     MAIN SHELL (VisionOS Floating Shell)
+     MAIN SHELL
 ============================================================ -->
 <main class="main-shell">
-
 
 <!-- ============================================================
      PAGE — DASHBOARD
@@ -54,7 +50,6 @@
   <h1>Dashboard</h1>
 
   <div class="dashboard-grid">
-
     <div class="dash-card">
       <h3>Create New Bill</h3>
       <p>Start a new patient bill</p>
@@ -78,11 +73,8 @@
       <p>Configure hospital details</p>
       <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
-
   </div>
 </section>
-
-
 
 <!-- ============================================================
      PAGE — NEW BILL
@@ -112,6 +104,7 @@
   <!-- PATIENT INFO -->
   <div class="card">
     <h2>Patient Information</h2>
+
     <div class="grid-3">
       <div>
         <label>UHID</label>
@@ -233,10 +226,7 @@
       <button id="exportPDF" class="btn">Export PDF</button>
     </div>
   </div>
-
 </section>
-
-
 
 <!-- ============================================================
      PAGE — TARIFF MASTER
@@ -276,8 +266,6 @@
   </div>
 </section>
 
-
-
 <!-- ============================================================
      PAGE — BILL HISTORY
 ============================================================ -->
@@ -302,7 +290,7 @@
 </section>
 
 <!-- ============================================================
-     PAGE 6 — ADMIN PANEL (Integrated)
+     PAGE — ADMIN PANEL (Integrated)
 ============================================================ -->
 <section id="adminPage" class="page floating-panel">
   <h1>Admin Panel</h1>
@@ -424,7 +412,6 @@
 
 </section>
 
-
 <!-- ============================================================
      PAGE — SETTINGS
 ============================================================ -->
@@ -456,23 +443,21 @@
   </div>
 </section>
 
-
 </main>
-
 
 <!-- ============================================================
      JS ENGINE
 ============================================================ -->
-<!-- APP LOGIC (normal script) -->
+
+<!-- APP ENGINE -->
 <script src="app.js"></script>
 
-<!-- PDF MODULES (must be loaded as ES6 modules) -->
-<script type="module">
-  import './pdf/amount-in-words.js';
-  import { exportPremiumPDF } from './pdf/pdf-engine.js';
+<!-- PDF ENGINE (NON-MODULE VERSION) -->
+<script src="pdf/amount-in-words.js"></script>
+<script src="pdf/pdf-engine.js"></script>
 
-  // Connect button event after module load
-  document.getElementById("exportPDF").onclick = exportPremiumPDF;
+<script>
+  document.getElementById("exportPDF").onclick = () => exportPremiumPDF();
 </script>
 
 </body>
