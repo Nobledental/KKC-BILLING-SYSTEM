@@ -1,10 +1,10 @@
 /* ============================================================
-   BILL PREVIEW MODAL — FIXED VERSION
-   Hidden by default (very important)
+   BILL PREVIEW MODAL — FINAL PRODUCTION BUILD
 ============================================================ */
 
+/* Hidden by default — FIXED */
 .preview-overlay {
-  display: none;           /* Hides modal at page load */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -43,6 +43,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 15px;
 }
 
 .preview-frame {
