@@ -1,18 +1,23 @@
 /* ================================================================
-   KCC — BILLING OS v3 (Admin Control Panel Engine)
-   VisionOS Ceramic Admin Module
-   Doctors • Staff • Departments
-   Offline First — IndexedDB
+   ADMIN PANEL ENGINE — Doctors / Staff / Roles
 ================================================================ */
 
-/* ------------------------- Quick Query ------------------------- */
-const $ = (id) => document.getElementById(id);
+const $ = (x) => document.getElementById(x);
 
-/* --------------------- IndexedDB Init -------------------------- */
+/* PAGE SWITCH */
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
+    $(btn.dataset.target).classList.add("active-page");
+  };
+});
+
+/* INIT DB */
 let DB;
-
-const dbReq = indexedDB.open("KCC_Billing_DB", 4);
+const dbReq = indexedDB.open("KCC_Admin_DB", 1);
 
 dbReq.onupgradeneeded = (e) => {
   DB = e.target.result;
@@ -23,302 +28,169 @@ dbReq.onupgradeneeded = (e) => {
   if (!DB.objectStoreNames.contains("staff"))
     DB.createObjectStore("staff", { keyPath: "id" });
 
-  if (!DB.objectStoreNames.contains("departments"))
-    DB.createObjectStore("departments", { keyPath: "id" });
+  if (!DB.objectStoreNames.contains("roles"))
+    DB.createObjectStore("roles", { keyPath: "id" });
 };
 
 dbReq.onsuccess = (e) => {
   DB = e.target.result;
-
   loadDoctors();
+  loadRoles();
   loadStaff();
-  loadDepartments();
 };
 
-dbReq.onerror = () => alert("Database error!");
+/* RANDOM ID */
+const randomID = () => "ID-" + Math.floor(Math.random() * 999999);
 
+/* ---------------------- DOCTORS CRUD ---------------------- */
 
+$("saveDoctor").onclick = () => {
+  const doc = {
+    id: randomID(),
+    name: $("doc_name").value,
+    specialization: $("doc_specialization").value,
+    phone: $("doc_phone").value,
+    email: $("doc_email").value
+  };
 
-/* ================================================================
-   MODAL ENGINE — Dynamic Field Generator
-================================================================ */
+  let tx = DB.transaction("doctors", "readwrite");
+  tx.objectStore("doctors").put(doc);
+  tx.oncomplete = () => {
+    $("doc_name").value =
+    $("doc_specialization").value =
+    $("doc_phone").value =
+    $("doc_email").value = "";
+    loadDoctors();
+  };
+};
 
-function openModal(type, index = null, data = null) {
-  $("modalType").value = type;
-  $("modalEditIndex").value = index !== null ? index : "";
-
-  $("modalName").value = "";
-  $("modalField1").value = "";
-  $("modalField2").value = "";
-
-  // Hide optional field2
-  $("modalField2Label").style.display = "none";
-  $("modalField2").style.display = "none";
-
-  if (type === "doctor") {
-    $("modalTitle").textContent = index === null ? "Add Doctor" : "Edit Doctor";
-
-    $("modalField1Label").textContent = "Department";
-    $("modalField2Label").textContent = "Phone Number";
-
-    $("modalField2Label").style.display = "block";
-    $("modalField2").style.display = "block";
-
-    if (data) {
-      $("modalName").value = data.name;
-      $("modalField1").value = data.department;
-      $("modalField2").value = data.phone;
-    }
-  }
-
-  if (type === "staff") {
-    $("modalTitle").textContent = index === null ? "Add Staff" : "Edit Staff";
-
-    $("modalField1Label").textContent = "Role";
-    $("modalField2Label").textContent = "Phone Number";
-    $("modalField2Label").style.display = "block";
-    $("modalField2").style.display = "block";
-
-    if (data) {
-      $("modalName").value = data.name;
-      $("modalField1").value = data.role;
-      $("modalField2").value = data.phone;
-    }
-  }
-
-  if (type === "dept") {
-    $("modalTitle").textContent = index === null ? "Add Department" : "Edit Department";
-
-    $("modalField1Label").textContent = "Department Code";
-    if (data) {
-      $("modalName").value = data.name;
-      $("modalField1").value = data.code;
-    }
-  }
-
-  // Show Modal
-  $("adminModalBackdrop").style.display = "flex";
-  $("adminModal").classList.add("modal-open");
+function deleteDoctor(id) {
+  let tx = DB.transaction("doctors", "readwrite");
+  tx.objectStore("doctors").delete(id);
+  tx.oncomplete = loadDoctors;
 }
-
-function closeAdminModal() {
-  $("adminModal").classList.remove("modal-open");
-  setTimeout(() => {
-    $("adminModalBackdrop").style.display = "none";
-  }, 200);
-}
-
-
-
-/* ================================================================
-   SAVE ENGINE — Doctors • Staff • Departments
-================================================================ */
-
-function saveAdminData() {
-  const type = $("modalType").value;
-  const index = $("modalEditIndex").value;
-
-  const name = $("modalName").value.trim();
-  const field1 = $("modalField1").value.trim();
-  const field2 = $("modalField2").value.trim();
-
-  if (!name) return alert("Name is required.");
-
-  let store = DB.transaction(type, "readwrite").objectStore(type);
-
-  // Generate ID only for new entry
-  const id = index ? index : `${type}_${Date.now()}`;
-
-  let data = { id, name };
-
-  if (type === "doctor") data = { id, name, department: field1, phone: field2 };
-  if (type === "staff") data = { id, name, role: field1, phone: field2 };
-  if (type === "departments") data = { id, name, code: field1 };
-
-  store.put(data);
-
-  closeAdminModal();
-
-  if (type === "doctors") loadDoctors();
-  if (type === "staff") loadStaff();
-  if (type === "departments") loadDepartments();
-}
-
-
-
-/* ================================================================
-   DELETE ENGINE
-================================================================ */
-function deleteItem(type, id) {
-  if (!confirm("Delete this entry?")) return;
-
-  const tx = DB.transaction(type, "readwrite");
-  tx.objectStore(type).delete(id);
-
-  if (type === "doctors") loadDoctors();
-  if (type === "staff") loadStaff();
-  if (type === "departments") loadDepartments();
-}
-
-
-
-/* ================================================================
-   TABLE LOADERS
-================================================================ */
 
 function loadDoctors() {
-  const tx = DB.transaction("doctors", "readonly");
+  let tx = DB.transaction("doctors", "readonly");
   tx.objectStore("doctors").getAll().onsuccess = (e) => {
-    const data = e.target.result;
-    const body = $("doctorTableBody");
-    body.innerHTML = "";
-
-    data.forEach((d) => {
-      const row = `
+    const tb = $("doctorTable").querySelector("tbody");
+    tb.innerHTML = "";
+    e.target.result.forEach(d => {
+      tb.innerHTML += `
         <tr>
           <td>${d.name}</td>
-          <td>${d.department}</td>
+          <td>${d.specialization}</td>
           <td>${d.phone}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('doctor', '${d.id}', ${JSON.stringify(d)})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('doctors', '${d.id}')">Delete</button>
-          </td>
-        </tr>
-      `;
-      body.innerHTML += row;
+          <td>${d.email}</td>
+          <td><button class="btn" onclick="deleteDoctor('${d.id}')">Delete</button></td>
+        </tr>`;
     });
   };
 }
 
-function loadStaff() {
-  const tx = DB.transaction("staff", "readonly");
-  tx.objectStore("staff").getAll().onsuccess = (e) => {
-    const data = e.target.result;
-    const body = $("staffTableBody");
-    body.innerHTML = "";
+/* ---------------------- ROLES CRUD ---------------------- */
 
-    data.forEach((s) => {
-      const row = `
+$("saveRole").onclick = () => {
+  const checks = Array.from(document.querySelectorAll(".permissions-box input:checked"))
+    .map(c => c.value);
+
+  const role = {
+    id: randomID(),
+    name: $("role_name").value,
+    permissions: checks
+  };
+
+  let tx = DB.transaction("roles", "readwrite");
+  tx.objectStore("roles").put(role);
+  tx.oncomplete = () => {
+    $("role_name").value = "";
+    document.querySelectorAll(".permissions-box input").forEach(i => i.checked = false);
+    loadRoles();
+    loadRolesToStaffDropdown();
+  };
+};
+
+function deleteRole(id) {
+  let tx = DB.transaction("roles", "readwrite");
+  tx.objectStore("roles").delete(id);
+  tx.oncomplete = () => {
+    loadRoles();
+    loadRolesToStaffDropdown();
+  };
+}
+
+function loadRoles() {
+  let tx = DB.transaction("roles", "readonly");
+  tx.objectStore("roles").getAll().onsuccess = (e) => {
+    const tb = $("rolesTable").querySelector("tbody");
+    tb.innerHTML = "";
+
+    e.target.result.forEach(r => {
+      tb.innerHTML += `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.permissions.join(", ")}</td>
+          <td><button class="btn" onclick="deleteRole('${r.id}')">Delete</button></td>
+        </tr>`;
+    });
+  };
+}
+
+/* Load roles in staff dropdown */
+function loadRolesToStaffDropdown() {
+  let tx = DB.transaction("roles", "readonly");
+  tx.objectStore("roles").getAll().onsuccess = (e) => {
+    const sel = $("staff_role");
+    sel.innerHTML = `<option value="">Select Role</option>`;
+    e.target.result.forEach(r => {
+      sel.innerHTML += `<option value="${r.name}">${r.name}</option>`;
+    });
+  };
+}
+
+/* ---------------------- STAFF CRUD ---------------------- */
+
+$("saveStaff").onclick = () => {
+  const st = {
+    id: randomID(),
+    name: $("staff_name").value,
+    role: $("staff_role").value,
+    phone: $("staff_phone").value,
+    email: $("staff_email").value
+  };
+
+  let tx = DB.transaction("staff", "readwrite");
+  tx.objectStore("staff").put(st);
+  tx.oncomplete = () => {
+    $("staff_name").value =
+    $("staff_role").value =
+    $("staff_phone").value =
+    $("staff_email").value = "";
+    loadStaff();
+  };
+};
+
+function deleteStaff(id) {
+  let tx = DB.transaction("staff", "readwrite");
+  tx.objectStore("staff").delete(id);
+  tx.oncomplete = loadStaff;
+}
+
+function loadStaff() {
+  let tx = DB.transaction("staff", "readonly");
+  tx.objectStore("staff").getAll().onsuccess = (e) => {
+    const tb = $("staffTable").querySelector("tbody");
+    tb.innerHTML = "";
+
+    e.target.result.forEach(s => {
+      tb.innerHTML += `
         <tr>
           <td>${s.name}</td>
           <td>${s.role}</td>
           <td>${s.phone}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('staff', '${s.id}', ${JSON.stringify(s)})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('staff', '${s.id}')">Delete</button>
-          </td>
-        </tr>
-      `;
-      body.innerHTML += row;
-    });
-  };
-}
-
-function loadDepartments() {
-  const tx = DB.transaction("departments", "readonly");
-  tx.objectStore("departments").getAll().onsuccess = (e) => {
-    const data = e.target.result;
-    const body = $("deptTableBody");
-    body.innerHTML = "";
-
-    data.forEach((d) => {
-      const row = `
-        <tr>
-          <td>${d.name}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('dept', '${d.id}', ${JSON.stringify(d)})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('departments', '${d.id}')">Delete</button>
-          </td>
-        </tr>
-      `;
-      body.innerHTML += row;
-    });
-  };
-}
-
-
-
-/* ================================================================
-   SEARCH & FILTER
-================================================================ */
-function filterTable(type) {
-  let searchValue = "";
-  let filterValue = "";
-
-  if (type === "doctor") {
-    searchValue = $("searchDoctor").value.toLowerCase();
-    filterValue = $("doctorFilter").value;
-  }
-
-  if (type === "staff") {
-    searchValue = $("searchStaff").value.toLowerCase();
-    filterValue = $("staffFilter").value;
-  }
-
-  const tx = DB.transaction(type, "readonly");
-  tx.objectStore(type).getAll().onsuccess = (e) => {
-    let data = e.target.result;
-
-    if (searchValue)
-      data = data.filter((item) => item.name.toLowerCase().includes(searchValue));
-
-    if (filterValue)
-      data = data.filter((item) =>
-        type === "doctor"
-          ? item.department === filterValue
-          : item.role === filterValue
-      );
-
-    const tableId =
-      type === "doctor"
-        ? "doctorTableBody"
-        : type === "staff"
-        ? "staffTableBody"
-        : "deptTableBody";
-
-    const body = $(tableId);
-    body.innerHTML = "";
-
-    data.forEach((d) => {
-      const row =
-        type === "doctor"
-          ? `
-        <tr>
-          <td>${d.name}</td>
-          <td>${d.department}</td>
-          <td>${d.phone}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('doctor','${d.id}', ${JSON.stringify(
-              d
-            )})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('doctors','${d.id}')">Delete</button>
-          </td>
-        </tr>`
-          : type === "staff"
-          ? `
-        <tr>
-          <td>${d.name}</td>
-          <td>${d.role}</td>
-          <td>${d.phone}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('staff','${d.id}', ${JSON.stringify(
-              d
-            )})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('staff','${d.id}')">Delete</button>
-          </td>
-        </tr>`
-          : `
-        <tr>
-          <td>${d.name}</td>
-          <td>
-            <button class="btn-edit" onclick="openModal('dept','${d.id}', ${JSON.stringify(
-              d
-            )})">Edit</button>
-            <button class="btn-del" onclick="deleteItem('departments','${d.id}')">Delete</button>
-          </td>
+          <td>${s.email}</td>
+          <td><button class="btn" onclick="deleteStaff('${s.id}')">Delete</button></td>
         </tr>`;
-
-      body.innerHTML += row;
     });
   };
 }
