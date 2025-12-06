@@ -334,9 +334,7 @@ tbody tr:hover td {
 /* ============================================================================
    TOTAL BOX
 ============================================================================ */
-.total-box {
-  text-align: right;
-}
+.total-box { text-align: right; }
 
 .total-meta {
   display: grid;
@@ -429,6 +427,83 @@ tbody tr:hover td {
 
 .admin-tab-content { display: none; }
 .active-admin-tab { display: block; }
+
+/* ============================================================================
+   📄 PDF PREVIEW MODAL (FULL FIX)
+============================================================================ */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* MUST BE ABOVE SIDEBAR */
+}
+
+.preview-overlay.active {
+  display: flex;
+}
+
+.preview-container {
+  width: 850px;
+  max-height: 92vh;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.25);
+  animation: zoomIn 0.25s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.preview-header {
+  padding: 18px 22px;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  font-size: 20px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.preview-frame {
+  width: 100%;
+  height: 700px;
+  border: none;
+  background: #f5f5f5;
+}
+
+.preview-actions {
+  padding: 14px;
+  background: #fafafa;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ============================================================================
+   PRINT VIEW (Ensures PDF looks clean)
+============================================================================ */
+@media print {
+  body * { visibility: hidden; }
+  .preview-frame, .preview-frame * {
+    visibility: visible;
+  }
+}
 
 /* ============================================================================
    RESPONSIVE
