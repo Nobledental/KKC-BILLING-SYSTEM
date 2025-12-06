@@ -1,435 +1,655 @@
 /* ============================================================================
-   KRISHNA KIDNEY CENTRE — Billing OS
-   CERAMIC V4 — Modern Hospital UI (Inspired by your reference images)
-   Ultra-premium, soft-gradient, glass, blue+mint medical theme
+   KRISHNA KIDNEY CENTRE — BILLING OS (Ceramic V4)
+   FINAL PRODUCTION BUILD — OFFLINE STABLE
+   ✔ New Bill reset fixed
+   ✔ Tariff, doctor, staff, settings synced
+   ✔ Counters stable
+   ✔ Load/Edit stable
+   ✔ PDF export stable
 ============================================================================ */
+
+const $ = (id) => document.getElementById(id);
+const qs = (s) => document.querySelector(s);
+const qsa = (s) => Array.from(document.querySelectorAll(s));
+
+const INR = (v) => "₹" + Number(v || 0).toLocaleString("en-IN");
+const num = (x) => (isNaN(parseFloat(x)) ? 0 : parseFloat(x));
 
 /* ============================================================================
-   ROOT COLORS — Modern Medical Palette
+   NAVIGATION — FIXED (New Bill auto-reset)
 ============================================================================ */
-:root {
-  /* Background & Panels */
-  --bg: #E9EDF6;
-  --panel: rgba(255,255,255,0.72);
-  --panel-strong: rgba(255,255,255,0.88);
-  --border: #D5D9E5;
-  --shadow: 0 24px 48px rgba(0,0,0,0.08);
+qsa(".nav-btn").forEach((btn) =>
+  btn.addEventListener("click", () => {
+    qsa(".nav-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    openPage(btn.dataset.target);
 
-  /* Text Colors */
-  --text-dark: #1C2331;
-  --text-muted: #6A748A;
+    if (btn.dataset.target === "newBillPage") {
+      prepareNewBill();
+    }
+  })
+);
 
-  /* Premium Accents (inspired by modern UI you shared) */
-  --accent: #3A7BFE;         /* Blue */
-  --accent-purple: #696CFF;  /* Purple */
-  --accent-mint: #2CC8A5;    /* Mint */
-
-  --deep-blue: #003E8A;      /* Navy for strong text */
-  --danger: #FF5A67;
-
-  /* Radii & Animations */
-  --radius: 22px;
-  --radius-sm: 16px;
-  --sidebar-width: 270px;
-  --transition: 0.25s ease;
-}
-
-/* ============================================================================
-   FONTS — English + Tamil Safe
-============================================================================ */
-@font-face {
-  font-family: "Manrope";
-  src: local("Manrope"), url("assets/fonts/Manrope-Regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "TamilSupport";
-  src: url("https://fonts.gstatic.com/s/katibeh/v12/ZGjXol5mq4-Q_CWv.woff2") format("woff2");
-}
-
-.tamil-text {
-  font-family: "TamilSupport", "Manrope", sans-serif;
+function openPage(id) {
+  qsa(".page").forEach((p) => p.classList.remove("active-page"));
+  $(id).classList.add("active-page");
 }
 
 /* ============================================================================
-   GLOBAL RESET
+   INDEXEDDB
 ============================================================================ */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Manrope", sans-serif;
+let DB;
+const req = indexedDB.open("KCC_Billing_DB_V4", 7);
+
+req.onupgradeneeded = (e) => {
+  DB = e.target.result;
+
+  if (!DB.objectStoreNames.contains("bills"))
+    DB.createObjectStore("bills", { keyPath: "bill_no" });
+
+  if (!DB.objectStoreNames.contains("tariffs"))
+    DB.createObjectStore("tariffs", { keyPath: "name" });
+
+  if (!DB.objectStoreNames.contains("settings"))
+    DB.createObjectStore("settings", { keyPath: "id" });
+
+  if (!DB.objectStoreNames.contains("doctors"))
+    DB.createObjectStore("doctors", { keyPath: "id", autoIncrement: true });
+
+  if (!DB.objectStoreNames.contains("staff"))
+    DB.createObjectStore("staff", { keyPath: "id", autoIncrement: true });
+};
+
+req.onsuccess = (e) => {
+  DB = e.target.result;
+
+  preloadHospitalDefaults();
+  preloadDoctorDefaults();
+  preloadTariffDefaults();
+
+  loadSettings();
+  loadTariffList();
+  loadTariffDropdown();
+  loadBillsList();
+  loadDoctorsTable();
+  loadStaffTable();
+
+  prepareNewBill();
+};
+
+/* ============================================================================
+   DEFAULT DATA LOADERS
+============================================================================ */
+
+function preloadHospitalDefaults() {
+  const tx = DB.transaction("settings", "readonly");
+  tx.objectStore("settings").get("hospital").onsuccess = (e) => {
+    if (e.target.result) return;
+
+    DB.transaction("settings", "readwrite")
+      .objectStore("settings")
+      .put({
+        id: "hospital",
+        name: "Krishna Kidney Centre",
+        address:
+          "No.1/375-7, Rayakottai Main Road,\nNear Flyover,\nKrishnagiri - 635001.",
+        phone: "8300224569 / 9442318169",
+        email: "bksrinivasan1980@yahoo.co.in",
+        gst: "",
+        logo: "assets/logo.png"
+      });
+  };
 }
 
-body {
-  background: var(--bg);
-  color: var(--text-dark);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+function preloadDoctorDefaults() {
+  const tx = DB.transaction("doctors", "readonly");
+  tx.objectStore("doctors").getAll().onsuccess = (e) => {
+    if (e.target.result.length) return;
+
+    DB.transaction("doctors", "readwrite")
+      .objectStore("doctors")
+      .put({
+        name: "Dr. B.K. SRINIVASAN",
+        specialization: "M.S., M.Ch (Urology)",
+        phone: "8300224569",
+        email: "bksrinivasan1980@yahoo.co.in",
+        reg: "73759"
+      });
+  };
+}
+
+function preloadTariffDefaults() {
+  const tx = DB.transaction("tariffs", "readonly");
+  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
+    if (e.target.result.length) return;
+
+    const defaults = [
+      ["SURGEON FEES", 50000],
+      ["ASSISTANT SURGEON FEES", 16000],
+      ["DJ STENTING", 12000],
+      ["ANAESTHESIA FEES", 16000],
+      ["ICU CHARGE", 5000],
+      ["DOCTOR CHARGE", 1200],
+      ["SPECIALITY DOCTOR ICU VISIT", 1500],
+      ["BED CHARGE", 1500],
+      ["NURSING CHARGES", 450],
+      ["OT CHARGE", 27000],
+      ["PRE-ANAESTHETIC CHECKUP", 1200],
+      ["MEDICINE CHARGE", 19243],
+      ["LAB AMOUNT", 4750]
+    ];
+
+    const store = DB.transaction("tariffs", "readwrite").objectStore("tariffs");
+    defaults.forEach(([name, rate]) => store.put({ name, rate }));
+  };
 }
 
 /* ============================================================================
-   SIDEBAR — Floating Glass
+   COUNTERS
 ============================================================================ */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: var(--sidebar-width);
-  height: 100vh;
 
-  background: rgba(255,255,255,0.65);
-  backdrop-filter: blur(24px) saturate(180%);
-  border-right: 1px solid var(--border);
-  box-shadow: 8px 0 28px rgba(0,0,0,0.05);
+function nextBillNo(cb) {
+  const key = "bill_counter";
+  const tx = DB.transaction("settings", "readwrite");
+  const store = tx.objectStore("settings");
 
-  padding: 30px 20px;
-  border-radius: 0 22px 22px 0;
-  animation: slideIn 0.6s ease;
-  z-index: 20;
+  store.get(key).onsuccess = (e) => {
+    let x = e.target.result ? e.target.result.value : 1;
+    store.put({ id: key, value: x + 1 });
+    cb(`KCC-${String(x).padStart(5, "0")}`);
+  };
 }
 
-@keyframes slideIn {
-  from { transform: translateX(-40px); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
-}
+function nextUHID(cb) {
+  const key = "uhid_counter";
+  const tx = DB.transaction("settings", "readwrite");
+  const store = tx.objectStore("settings");
 
-.sidebar-header {
-  text-align: center;
-}
-
-.sidebar-logo {
-  width: 84px;
-  height: 84px;
-  object-fit: contain;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.12));
-}
-
-.sidebar h2 {
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--deep-blue);
-}
-
-.sidebar .tagline {
-  font-size: 13px;
-  margin-top: 4px;
-  color: var(--text-muted);
-}
-
-/* Sidebar NAV */
-.sidebar-nav {
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.nav-btn {
-  width: 100%;
-  padding: 13px 18px;
-
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(180,190,210,0.4);
-  border-radius: var(--radius-sm);
-
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-dark);
-
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.nav-btn:hover {
-  background: rgba(255,255,255,0.92);
-  transform: translateX(4px);
-}
-
-.nav-btn.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 12px 26px rgba(58,123,254,0.3);
-}
-
-.admin-btn {
-  margin-top: 10px;
-  background: rgba(58,123,254,0.12);
-  border-color: rgba(58,123,254,0.4);
-  color: var(--accent);
-}
-
-.admin-btn:hover {
-  background: rgba(58,123,254,0.18);
-  color: var(--deep-blue);
+  store.get(key).onsuccess = (e) => {
+    let x = e.target.result ? e.target.result.value : 1;
+    store.put({ id: key, value: x + 1 });
+    cb(`MR-${String(x).padStart(5, "0")}`);
+  };
 }
 
 /* ============================================================================
-   MAIN WRAPPER
+   PREPARE NEW BILL — FIXED
 ============================================================================ */
-.main-shell {
-  margin-left: var(--sidebar-width);
-  padding: 44px;
-  animation: fade 0.4s ease;
-}
+function prepareNewBill() {
+  nextBillNo((id) => ($("bill_no").value = id));
+  nextUHID((id) => ($("patient_id").value = id));
 
-@keyframes fade {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; }
+  $("bill_date").value = new Date().toISOString().slice(0, 10);
+  $("bill_time").value = new Date().toTimeString().slice(0, 5);
+
+  $("p_name").value = "";
+  $("p_age").value = "";
+  $("p_gender").value = "Male";
+  $("p_doctor").value = "";
+
+  $("p_doa").value = "";
+  $("p_dod").value = "";
+  $("p_adm_time").value = "";
+  $("p_dis_time").value = "";
+
+  $("discount_percent").value = 0;
+  $("discount_amount").value = 0;
+  $("insurance_mode").value = "no";
+
+  qs("#chargesTable tbody").innerHTML = "";
+
+  updateTotals();
 }
 
 /* ============================================================================
-   FLOATING PANELS — Modern Glass
+   CHARGES TABLE
 ============================================================================ */
-.floating-panel {
-  background: var(--panel);
-  backdrop-filter: blur(22px) saturate(180%);
-  padding: 34px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  animation: panelFade 0.35s ease;
+
+$("addRowBtn").onclick = () => addRow();
+
+const tbody = qs("#chargesTable tbody");
+
+function addRow(desc = "", rate = "", qty = 1) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input class="desc" value="${desc}"></td>
+    <td><input class="rate" type="number" value="${rate}"></td>
+    <td><input class="qty" type="number" value="${qty}"></td>
+    <td class="rowTotal">₹0</td>
+    <td><button class="delete-row">X</button></td>
+  `;
+  tbody.appendChild(tr);
+  updateTotals();
 }
 
-@keyframes panelFade {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+tbody.addEventListener("input", updateTotals);
 
-.page { display: none; }
-.active-page { display: block; }
-
-/* ============================================================================
-   HEADINGS
-============================================================================ */
-h1 {
-  font-size: 32px;
-  font-weight: 800;
-  margin-bottom: 30px;
-  color: var(--deep-blue);
-}
-
-h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 18px;
-}
-
-/* ============================================================================
-   CARDS
-============================================================================ */
-.card {
-  background: var(--panel-strong);
-  backdrop-filter: blur(16px);
-  padding: 28px;
-  margin-top: 30px;
-
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  box-shadow: 0 16px 35px rgba(0,0,0,0.06);
-
-  transition: var(--transition);
-}
-
-.card:hover {
-  transform: translateY(-3px);
-}
-
-/* ============================================================================
-   GRID
-============================================================================ */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-}
-
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 22px;
-}
-
-/* ============================================================================
-   INPUTS
-============================================================================ */
-input, select, textarea {
-  width: 100%;
-  padding: 14px;
-  border-radius: var(--radius-sm);
-
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(165,175,200,0.45);
-
-  font-size: 15px;
-  transition: var(--transition);
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(58,123,254,0.25);
-}
-
-/* ============================================================================
-   TABLES — Clean Hospital Style
-============================================================================ */
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  text-align: left;
-  padding: 14px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-}
-
-td {
-  padding: 14px;
-  background: rgba(255,255,255,0.7);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-
-tbody tr:hover td {
-  background: rgba(58,123,254,0.08);
-}
-
-/* ============================================================================
-   BUTTONS — Premium Soft UI
-============================================================================ */
-.btn {
-  padding: 12px 18px;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-
-  background: var(--accent);
-  color: #fff;
-  transition: var(--transition);
-  box-shadow: 0 6px 16px rgba(58,123,254,0.25);
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(58,123,254,0.35);
-}
-
-.primary {
-  background: var(--accent-mint);
-  box-shadow: 0 12px 24px rgba(44,200,165,0.35);
-}
-
-.primary:hover {
-  background: #22b493;
-}
-
-.ghost {
-  background: transparent;
-  color: var(--text-dark);
-  border: 1px solid rgba(150,170,210,0.4);
-}
-
-.ghost:hover {
-  background: rgba(150,170,210,0.15);
-  color: var(--accent);
-}
-
-.delete-row {
-  background: var(--danger);
-  padding: 8px 12px;
-  color: #fff;
-  border-radius: 8px;
-}
-
-.delete-row:hover {
-  background: #e74453;
-}
-
-/* ============================================================================
-   TOTAL SECTION
-============================================================================ */
-.total-box { text-align: right; }
-
-.total-meta {
-  display: grid;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.meta-line {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.total-line {
-  font-size: 28px;
-  font-weight: 800;
-  margin: 20px 0;
-  color: var(--deep-blue);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-/* ============================================================================
-   DASHBOARD CARDS
-============================================================================ */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
-  gap: 26px;
-}
-
-.dash-card {
-  background: var(--panel-strong);
-  padding: 26px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-}
-
-.dash-card:hover { transform: translateY(-5px); }
-
-.dash-card h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.dash-card p {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
-/* ============================================================================
-   RESPONSIVE
-============================================================================ */
-@media (max-width: 980px) {
-  .grid-3, .grid-2 { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 800px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
+tbody.addEventListener("click", (e) => {
+  if (e.target.classList.contains("delete-row")) {
+    e.target.closest("tr").remove();
+    updateTotals();
   }
-  .main-shell {
-    margin-left: 0;
-    padding-top: 200px;
+});
+
+/* ============================================================================
+   TOTALS
+============================================================================ */
+
+["discount_percent", "discount_amount"].forEach((id) =>
+  $(id).addEventListener("input", updateTotals)
+);
+
+function calculateTotals() {
+  let gross = 0;
+
+  qsa("#chargesTable tbody tr").forEach((row) => {
+    const r = num(row.querySelector(".rate").value);
+    const q = num(row.querySelector(".qty").value);
+    const t = r * q;
+
+    row.querySelector(".rowTotal").textContent = INR(t);
+    gross += t;
+  });
+
+  let dP = num($("discount_percent").value);
+  let dA = num($("discount_amount").value);
+
+  if (dP > 0) {
+    dA = (gross * dP) / 100;
+    $("discount_amount").value = dA.toFixed(0);
+  }
+
+  return {
+    gross,
+    dA,
+    final: Math.max(gross - dA, 0)
+  };
+}
+
+function updateTotals() {
+  const t = calculateTotals();
+  $("subTotal").textContent = INR(t.gross);
+  $("discountValue").textContent = t.dA > 0 ? "-" + INR(t.dA) : INR(0);
+  $("grandTotal").textContent = INR(t.final);
+}
+
+/* ============================================================================
+   TARIFF MASTER
+============================================================================ */
+
+$("saveTariff").onclick = saveTariff;
+
+function saveTariff() {
+  const name = $("tariff_name").value.trim();
+  const rate = num($("tariff_rate").value);
+  if (!name || !rate) return alert("Enter Tariff Name & Rate");
+
+  DB.transaction("tariffs", "readwrite")
+    .objectStore("tariffs")
+    .put({ name, rate });
+
+  $("tariff_name").value = "";
+  $("tariff_rate").value = "";
+  loadTariffList();
+}
+
+function loadTariffList() {
+  const tx = DB.transaction("tariffs", "readonly");
+  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
+    const table = $("tariffTable").querySelector("tbody");
+    table.innerHTML = "";
+
+    e.target.result.forEach((t) => {
+      table.innerHTML += `
+        <tr>
+          <td>${t.name}</td>
+          <td>${INR(t.rate)}</td>
+          <td><button class="delete-row" onclick="deleteTariff('${t.name}')">Delete</button></td>
+        </tr>
+      `;
+    });
+
+    loadTariffDropdown();
+  };
+}
+
+function deleteTariff(name) {
+  DB.transaction("tariffs", "readwrite")
+    .objectStore("tariffs")
+    .delete(name);
+
+  loadTariffList();
+}
+
+function loadTariffDropdown() {
+  const sel = $("procedureSelect");
+  sel.innerHTML = `<option value="">Select Procedure</option>`;
+
+  const tx = DB.transaction("tariffs", "readonly");
+  tx.objectStore("tariffs").getAll().onsuccess = (e) => {
+    e.target.result.forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t.name;
+      opt.textContent = t.name;
+      sel.appendChild(opt);
+    });
+  };
+}
+
+$("procedureSelect").onchange = () => {
+  const name = $("procedureSelect").value;
+  if (!name) return;
+
+  DB.transaction("tariffs", "readonly")
+    .objectStore("tariffs")
+    .get(name).onsuccess = (e) => {
+      addRow(name, e.target.result.rate, 1);
+    };
+};
+
+/* ============================================================================
+   SAVE BILL
+============================================================================ */
+
+$("saveBill").onclick = saveBill;
+
+function saveBill() {
+  updateTotals();
+
+  const charges = qsa("#chargesTable tbody tr").map((r) => ({
+    desc: r.querySelector(".desc").value,
+    rate: r.querySelector(".rate").value,
+    qty: r.querySelector(".qty").value
+  }));
+
+  const bill = {
+    bill_no: $("bill_no").value,
+    patient_id: $("patient_id").value,
+    name: $("p_name").value,
+    age: $("p_age").value,
+    gender: $("p_gender").value,
+    doctor: $("p_doctor").value,
+
+    doa: $("p_doa").value,
+    dod: $("p_dod").value,
+    adm: $("p_adm_time").value,
+    dis: $("p_dis_time").value,
+
+    date: $("bill_date").value,
+    time: $("bill_time").value,
+
+    discount_percent: $("discount_percent").value,
+    discount_amount: $("discount_amount").value,
+    insurance: $("insurance_mode").value,
+
+    total: $("grandTotal").textContent,
+    charges
+  };
+
+  DB.transaction("bills", "readwrite")
+    .objectStore("bills")
+    .put(bill);
+
+  alert("Bill saved successfully.");
+  loadBillsList();
+}
+
+/* ============================================================================
+   BILL HISTORY
+============================================================================ */
+
+function loadBillsList() {
+  DB.transaction("bills", "readonly")
+    .objectStore("bills")
+    .getAll().onsuccess = (e) => {
+      const table = $("billsTable").querySelector("tbody");
+      table.innerHTML = "";
+
+      e.target.result.forEach((b) => {
+        table.innerHTML += `
+          <tr>
+            <td>${b.bill_no}</td>
+            <td>${b.patient_id}</td>
+            <td>${b.name}</td>
+            <td>${b.date}</td>
+            <td>${b.total}</td>
+            <td>
+              <button class="btn" onclick="openBill('${b.bill_no}')">Open</button>
+            </td>
+          </tr>
+        `;
+      });
+    };
+}
+
+function openBill(id) {
+  DB.transaction("bills", "readonly")
+    .objectStore("bills")
+    .get(id).onsuccess = (e) => {
+      const b = e.target.result;
+      if (!b) return;
+
+      openPage("newBillPage");
+
+      $("bill_no").value      = b.bill_no;
+      $("patient_id").value   = b.patient_id;
+      $("p_name").value       = b.name;
+      $("p_age").value        = b.age;
+      $("p_gender").value     = b.gender;
+      $("p_doctor").value     = b.doctor;
+
+      $("p_doa").value        = b.doa;
+      $("p_dod").value        = b.dod;
+      $("p_adm_time").value   = b.adm;
+      $("p_dis_time").value   = b.dis;
+
+      $("bill_date").value    = b.date;
+      $("bill_time").value    = b.time;
+
+      $("discount_percent").value = b.discount_percent;
+      $("discount_amount").value  = b.discount_amount;
+      $("insurance_mode").value   = b.insurance;
+
+      tbody.innerHTML = "";
+      b.charges.forEach((c) => addRow(c.desc, c.rate, c.qty));
+
+      updateTotals();
+    };
+}
+
+/* ============================================================================
+   DOCTOR MASTER
+============================================================================ */
+
+$("saveDoctor").onclick = () => {
+  const doc = {
+    name: $("doc_name").value,
+    specialization: $("doc_specialization").value,
+    phone: $("doc_phone").value,
+    email: $("doc_email").value
+  };
+
+  DB.transaction("doctors", "readwrite")
+    .objectStore("doctors")
+    .put(doc);
+
+  loadDoctorsTable();
+  alert("Doctor saved.");
+};
+
+function loadDoctorsTable() {
+  DB.transaction("doctors", "readonly")
+    .objectStore("doctors")
+    .getAll().onsuccess = (e) => {
+      const table = $("doctorTable").querySelector("tbody");
+      table.innerHTML = "";
+
+      e.target.result.forEach((d) => {
+        table.innerHTML += `
+          <tr>
+            <td>${d.name}</td>
+            <td>${d.specialization}</td>
+            <td>${d.phone}</td>
+            <td>${d.email}</td>
+            <td></td>
+          </tr>
+        `;
+      });
+    };
+}
+
+/* ============================================================================
+   STAFF MASTER
+============================================================================ */
+
+$("saveStaff").onclick = () => {
+  const st = {
+    name: $("staff_name").value,
+    role: $("staff_role").value,
+    phone: $("staff_phone").value,
+    email: $("staff_email").value
+  };
+
+  DB.transaction("staff", "readwrite")
+    .objectStore("staff")
+    .put(st);
+
+  loadStaffTable();
+  alert("Staff saved.");
+};
+
+function loadStaffTable() {
+  DB.transaction("staff", "readonly")
+    .objectStore("staff")
+    .getAll().onsuccess = (e) => {
+      const table = $("staffTable").querySelector("tbody");
+      table.innerHTML = "";
+
+      e.target.result.forEach((s) => {
+        table.innerHTML += `
+          <tr>
+            <td>${s.name}</td>
+            <td>${s.role}</td>
+            <td>${s.phone}</td>
+            <td>${s.email}</td>
+            <td></td>
+          </tr>
+        `;
+      });
+    };
+}
+
+/* ============================================================================
+   SETTINGS
+============================================================================ */
+
+$("saveSettings").onclick = saveSettings;
+
+function saveSettings() {
+  const d = {
+    id: "hospital",
+    name: $("set_h_name").value,
+    address: $("set_h_address").value,
+    phone: $("set_h_phone").value,
+    email: $("set_h_email").value,
+    gst: $("set_h_gst").value
+  };
+
+  const file = $("set_h_logo").files[0];
+  if (file) {
+    const r = new FileReader();
+    r.onload = () => {
+      d.logo = r.result;
+      saveSettingsFinal(d);
+    };
+    r.readAsDataURL(file);
+  } else {
+    saveSettingsFinal(d);
   }
 }
+
+function saveSettingsFinal(d) {
+  DB.transaction("settings", "readwrite")
+    .objectStore("settings")
+    .put(d);
+
+  alert("Settings Updated");
+}
+
+function loadSettings() {
+  DB.transaction("settings", "readonly")
+    .objectStore("settings")
+    .get("hospital").onsuccess = (e) => {
+      const s = e.target.result || {};
+
+      $("set_h_name").value = s.name || "";
+      $("set_h_address").value = s.address || "";
+      $("set_h_phone").value = s.phone || "";
+      $("set_h_email").value = s.email || "";
+      $("set_h_gst").value = s.gst || "";
+    };
+}
+
+/* ============================================================================
+   DEMO BILL
+============================================================================ */
+
+$("loadDemoBill").onclick = () => {
+  openPage("newBillPage");
+
+  $("p_name").value = "Mr. Praveen Kumar";
+  $("p_age").value = "46";
+  $("p_gender").value = "Male";
+  $("p_doctor").value = "Dr. B.K. SRINIVASAN";
+
+  $("p_doa").value = "2025-09-27";
+  $("p_dod").value = "2025-09-28";
+  $("p_adm_time").value = "09:30";
+  $("p_dis_time").value = "12:00";
+
+  tbody.innerHTML = "";
+
+  const list = [
+    ["SURGEON FEES", 50000, 1],
+    ["ASSISTANT SURGEON FEES", 16000, 1],
+    ["DJ STENTING", 12000, 1],
+    ["ANAESTHESIA FEES", 16000, 1],
+    ["ICU CHARGE", 5000, 1],
+    ["DOCTOR CHARGE", 1200, 3],
+    ["SPECIALITY DOCTOR ICU VISIT", 1500, 1],
+    ["BED CHARGE", 1500, 2],
+    ["NURSING CHARGES", 450, 2],
+    ["OT CHARGE", 27000, 1],
+    ["PRE-ANAESTHETIC CHECKUP", 1200, 1],
+    ["MEDICINE CHARGE", 19243, 1],
+    ["LAB AMOUNT", 4750, 1]
+  ];
+
+  list.forEach((i) => addRow(i[0], i[1], i[2]));
+
+  updateTotals();
+};
+
+/* ============================================================================
+   PDF EXPORT HOOK
+============================================================================ */
+$("exportPDF").onclick = () => exportPremiumPDF();
+
+/* ============================================================================
+   ADMIN TAB SWITCHING
+============================================================================ */
+
+document.querySelectorAll(".admin-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document
+      .querySelectorAll(".admin-tab")
+      .forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    document
+      .querySelectorAll(".admin-tab-content")
+      .forEach((box) => box.classList.remove("active-admin-tab"));
+
+    $(tab.dataset.adminTarget).classList.add("active-admin-tab");
+  });
+});
