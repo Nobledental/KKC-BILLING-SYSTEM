@@ -385,6 +385,29 @@
 </div>
 
 <!-- ============================================================
+     BILL PREVIEW MODAL (Hidden Until Triggered)
+============================================================ -->
+<link rel="stylesheet" href="pdf/preview.css">
+
+<div id="billPreviewModal" class="preview-overlay">
+  <div class="preview-container">
+    
+    <div class="preview-header">
+      <h2>Bill Preview</h2>
+      <button id="closePreview" class="close-btn">✕</button>
+    </div>
+
+    <iframe id="billPreviewFrame" class="preview-frame"></iframe>
+
+    <div class="preview-actions">
+      <button id="downloadPdfBtn" class="btn primary">Download PDF</button>
+      <button id="closePreview2" class="btn ghost">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
      JS ENGINE
 ============================================================ -->
 
