@@ -1,0 +1,266 @@
+/* ============================================================================
+   PREMIUM BILL TEMPLATE — TEAL + DARK BLUE (H3 + T3 + TOT1 Hybrid)
+   Krishna Kidney Centre — Final Bill / Invoice
+   Clean, professional, NABH-grade styling
+   ============================================================================ */
+
+.bill-wrapper {
+  width: 100%;
+  padding: 40px 48px;
+  font-family: "Manrope", sans-serif;
+  color: #0b1a33;
+  background: white;
+}
+
+
+
+/* ============================================================================
+   HEADER SECTION
+============================================================================ */
+
+.bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.bill-logo-large {
+  width: 160px;
+  height: auto;
+}
+
+.bill-hospital-name {
+  font-size: 30px;
+  font-weight: 800;
+  color: #003e8a;
+  margin-bottom: 8px;
+}
+
+.bill-hospital-details {
+  font-size: 14px;
+  color: #45556c;
+  line-height: 1.5;
+}
+
+
+
+/* --------------------------------------------------------------------
+   Gradient Rule (Teal → Blue)
+-------------------------------------------------------------------- */
+
+.bill-header-gradient {
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  margin: 26px 0 32px;
+  background: linear-gradient(to right, #1ba7a5, #003e8a);
+}
+
+
+
+/* ============================================================================
+   SECTION HEADINGS
+============================================================================ */
+.bill-section h2 {
+  font-size: 19px;
+  font-weight: 800;
+  color: #003e8a;
+  margin-bottom: 16px;
+}
+
+
+
+/* ============================================================================
+   META GRID (H3 layout)
+============================================================================ */
+.bill-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.bill-meta-grid h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1ba7a5;  /* teal label */
+  margin-bottom: 4px;
+}
+
+.bill-meta-grid p {
+  font-size: 15px;
+  color: #0b1a33;
+}
+
+
+
+/* ============================================================================
+   CHARGES TABLE — T3 STYLE
+============================================================================ */
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.bill-table thead th {
+  padding: 12px 10px;
+  font-size: 14px;
+
+  background: #eef6ff;
+  color: #003e8a;
+
+  border-bottom: 2px solid #d4e7ff;
+}
+
+.bill-table td {
+  padding: 12px 10px;
+  font-size: 15px;
+  border-bottom: 1px solid #e8edf5;
+}
+
+.bill-table tr:hover td {
+  background: #f5fbff;
+}
+
+
+
+/* ============================================================================
+   TOTAL SECTION — TOT1 / TOT3 HYBRID
+============================================================================ */
+
+.bill-total-box {
+  margin-top: 35px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #d8ecf0;
+}
+
+.bill-total-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  color: #003e8a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.bill-total-border {
+  border-bottom: 1px solid #d9e5ef;
+}
+
+.bill-final {
+  margin-top: 24px;
+  padding: 16px 20px;
+
+  display: flex;
+  justify-content: space-between;
+
+  font-size: 22px;
+  font-weight: 900;
+
+  color: #003e8a;
+
+  background: rgba(27,167,165,0.12);
+  border: 1px solid #1ba7a5;
+  border-radius: 14px;
+}
+
+
+
+/* ============================================================================
+   AMOUNT IN WORDS BLOCK (Professional)
+============================================================================ */
+
+.amount-words {
+  margin-top: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0b1a33;
+}
+
+.amount-words span {
+  color: #003e8a;
+}
+
+
+
+/* ============================================================================
+   RECEIPT SUMMARY (For final bill)
+============================================================================ */
+
+.receipt-box {
+  margin-top: 30px;
+  background: rgba(27,167,165,0.08);
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(27,167,165,0.25);
+}
+
+.receipt-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: #003e8a;
+  font-size: 15px;
+}
+
+.receipt-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #003e8a;
+}
+
+
+
+/* ============================================================================
+   SIGNATURES
+============================================================================ */
+
+.signature-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 60px;
+}
+
+.sig-box {
+  width: 45%;
+  text-align: left;
+}
+
+.sig-line {
+  width: 100%;
+  height: 1px;
+  background: #003e8a;
+  margin-bottom: 6px;
+}
+
+.sig-label {
+  font-size: 14px;
+  color: #003e8a;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+
+
+/* ============================================================================
+   FOOTER (Powered by)
+============================================================================ */
+
+.bill-footer {
+  margin-top: 40px;
+  font-size: 13px;
+  color: #6a7ea0;
+  text-align: right;
+}
+
+.bill-footer strong {
+  color: #003e8a;
+}
