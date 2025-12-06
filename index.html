@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Krishna Kidney Centre – Billing Software</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- jsPDF (Offline PDF generator) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+  <!-- ==============================================
+       HEADER
+  ================================================== -->
+  <header class="app-header">
+    <div class="logo-box">
+      <img src="kcc-logo.png" class="logo">
+      <div>
+        <h1>KRISHNA KIDNEY CENTRE</h1>
+        <p class="subhead">Advanced Billing Software (Offline)</p>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ==============================================
+       MAIN APP WRAPPER
+  ================================================== -->
+  <main class="app-shell">
+
+    <!-- ============================
+         PATIENT DETAILS
+    ============================= -->
+    <section class="card">
+      <h2>Patient Information</h2>
+
+      <div class="grid-2">
+        <div>
+          <label>Patient Name</label>
+          <input id="p_name" type="text">
+
+          <label>Age</label>
+          <input id="p_age" type="number">
+
+          <label>Gender</label>
+          <select id="p_gender">
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+
+          <label>Doctor Name</label>
+          <input id="p_doctor" type="text">
+        </div>
+
+        <div>
+          <label>Date of Admission</label>
+          <input id="p_doa" type="date">
+
+          <label>Date of Discharge</label>
+          <input id="p_dod" type="date">
+
+          <label>Admission Time</label>
+          <input id="p_adm_time" type="time">
+
+          <label>Discharge Time</label>
+          <input id="p_dis_time" type="time">
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ============================
+         CHARGES TABLE
+    ============================= -->
+    <section class="card">
+      <div class="table-header">
+        <h2>Charges</h2>
+        <button class="btn" id="addRowBtn">+ Add Item</button>
+      </div>
+
+      <table id="chargesTable">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Charge/Unit</th>
+            <th>Units</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+
+
+    <!-- ============================
+         TOTAL SECTION
+    ============================= -->
+    <section class="card total-box">
+      <h2>Total</h2>
+      <div class="total-line">
+        <label>Total Amount:</label>
+        <span id="grandTotal">₹0</span>
+      </div>
+
+      <button class="btn primary" id="generateBill">Download PDF Bill</button>
+    </section>
+
+  </main>
+
+  <!-- JS -->
+  <script defer src="app.js"></script>
+
+</body>
+</html>
