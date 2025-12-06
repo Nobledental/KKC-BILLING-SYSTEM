@@ -1,218 +1,186 @@
 /* ============================================================================
-   KRISHNA KIDNEY CENTRE — PDF ENGINE (FINAL PRODUCTION • A4 PREMIUM)
-   ✔ jsPDF UMD (window.jspdf.jsPDF)
-   ✔ AutoTable layout
-   ✔ Tamil footer
-   ✔ Amount in words
-   ✔ Fully synced with collectBillData()
+   KCC Billing OS — PDF ENGINE (Ceramic V6 FINAL)
+   ✔ Offline Safe
+   ✔ jsPDF UMD Compatible
+   ✔ AutoTable Supported
+   ✔ Reads Live DOM (collectBillData)
+   ✔ Reads Hospital Settings (IndexedDB)
+   ✔ Amount in Words (amount-in-words.js)
 ============================================================================ */
 
 async function exportPremiumPDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ unit: "pt", format: "a4" });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "pt", format: "a4", compress: true });
 
-  const hospital = await getHospitalSettings();
-  const bill = collectBillData();
+    const bill = collectBillData();
+    const hospital = await getHospitalSettings();
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const margin = 40;
-  let y = margin;
+    const margin = 40;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    let y = margin;
 
-  pdf.setFont("Times-Roman");
+    pdf.setFont("Times-Roman");
 
-  /* ============================================================================
-       HEADER — HOSPITAL LOGO + DETAILS
-  ============================================================================ */
-
-  if (hospital.logo) {
-    try {
-      pdf.addImage(hospital.logo, "PNG", margin, y, 80, 80);
-    } catch (e) {
-      console.warn("Logo draw error:", e);
+    /* -----------------------------------------------
+       LOGO
+    ----------------------------------------------- */
+    if (hospital.logo) {
+        try {
+            pdf.addImage(hospital.logo, "PNG", margin, y, 90, 90);
+        } catch (err) {
+            console.warn("Logo error:", err);
+        }
     }
-  }
 
-  pdf.setFontSize(20);
-  pdf.text(hospital.name || "Krishna Kidney Centre", margin + 110, y + 15);
+    /* -----------------------------------------------
+       HOSPITAL DETAILS
+    ----------------------------------------------- */
+    pdf.setFontSize(20);
+    pdf.text(hospital.name || "Krishna Kidney Centre", margin + 120, y + 18);
 
-  pdf.setFontSize(11);
+    pdf.setFontSize(11);
+    (hospital.address || "").split("\n").forEach((line, i) => {
+        pdf.text(line, margin + 120, y + 42 + i * 14);
+    });
 
-  const addr = (hospital.address || "").split("\n");
-  addr.forEach((line, i) => {
-    pdf.text(line, margin + 110, y + 40 + i * 14);
-  });
+    pdf.text("Phone: " + (hospital.phone || ""), margin + 120, y + 90);
+    pdf.text("Email: " + (hospital.email || ""), margin + 120, y + 106);
 
-  pdf.text(`Phone: ${hospital.phone || ""}`, margin + 110, y + 95);
-  pdf.text(`Email: ${hospital.email || ""}`, margin + 110, y + 110);
+    y += 130;
+    pdf.setLineWidth(0.7);
+    pdf.line(margin, y, pageWidth - margin, y);
 
-  y += 130;
-  pdf.setLineWidth(0.8);
-  pdf.line(margin, y, pageWidth - margin, y);
-  y += 25;
+    y += 30;
 
-  /* ============================================================================
+    /* -----------------------------------------------
        BILL DETAILS
-  ============================================================================ */
-  pdf.setFontSize(13);
-  pdf.text("BILL DETAILS", margin, y);
-  y += 18;
+    ----------------------------------------------- */
+    pdf.setFontSize(13);
+    pdf.text("BILL DETAILS", margin, y);
+    y += 18;
 
-  pdf.setFontSize(11);
-  pdf.text(`Bill No: ${bill.bill_no}`, margin, y);
-  pdf.text(`Bill Date: ${bill.date}`, margin + 200, y);
-  pdf.text(`Time: ${bill.time}`, margin + 380, y);
-  y += 20;
+    pdf.setFontSize(11);
+    pdf.text(`Bill No: ${bill.bill_no}`, margin, y);
+    pdf.text(`Date: ${bill.date}`, margin + 220, y);
+    pdf.text(`Time: ${bill.time}`, margin + 380, y);
 
-  /* ============================================================================
+    y += 24;
+
+    /* -----------------------------------------------
        PATIENT DETAILS
-  ============================================================================ */
-  pdf.setFontSize(13);
-  pdf.text("PATIENT DETAILS", margin, y);
-  y += 18;
+    ----------------------------------------------- */
+    pdf.setFontSize(13);
+    pdf.text("PATIENT DETAILS", margin, y);
+    y += 18;
 
-  pdf.setFontSize(11);
+    pdf.setFontSize(11);
+    pdf.text(`UHID: ${bill.patient_id}`, margin, y);
+    pdf.text(`Name: ${bill.name}`, margin + 220, y);
+    y += 18;
 
-  pdf.text(`UHID: ${bill.patient_id}`, margin, y);
-  pdf.text(`Patient Name: ${bill.name}`, margin + 200, y);
-  y += 18;
+    pdf.text(`Age / Gender: ${bill.age} / ${bill.gender}`, margin, y);
+    pdf.text(`Doctor: ${bill.doctor}`, margin + 220, y);
+    y += 18;
 
-  pdf.text(`Age / Gender: ${bill.age} / ${bill.gender}`, margin, y);
-  pdf.text(`Doctor: ${bill.doctor}`, margin + 200, y);
-  y += 18;
+    pdf.text(`Date of Admission: ${bill.doa}`, margin, y);
+    pdf.text(`Date of Discharge: ${bill.dod}`, margin + 220, y);
+    y += 18;
 
-  pdf.text(`Date of Admission: ${bill.doa}`, margin, y);
-  pdf.text(`Date of Discharge: ${bill.dod}`, margin + 200, y);
-  y += 18;
+    pdf.text(`Admission Time: ${bill.adm}`, margin, y);
+    pdf.text(`Discharge Time: ${bill.dis}`, margin + 220, y);
+    y += 30;
 
-  pdf.text(`Admission Time: ${bill.adm}`, margin, y);
-  pdf.text(`Discharge Time: ${bill.dis}`, margin + 200, y);
-  y += 30;
+    pdf.line(margin, y, pageWidth - margin, y);
+    y += 20;
 
-  pdf.line(margin, y, pageWidth - margin, y);
-  y += 20;
-
-  /* ============================================================================
+    /* -----------------------------------------------
        CHARGES TABLE — AutoTable
-  ============================================================================ */
-  const tableData = bill.charges.map((row) => [
-    row.desc,
-    "₹" + Number(row.rate).toLocaleString("en-IN"),
-    row.qty,
-    "₹" + (row.rate * row.qty).toLocaleString("en-IN"),
-  ]);
+    ----------------------------------------------- */
+    const tableData = bill.charges.map(row => [
+        row.desc,
+        "₹" + Number(row.rate).toLocaleString("en-IN"),
+        row.qty,
+        "₹" + (row.rate * row.qty).toLocaleString("en-IN"),
+    ]);
 
-  pdf.autoTable({
-    startY: y,
-    head: [["Description", "Rate", "Qty", "Amount"]],
-    body: tableData,
-    theme: "grid",
-    styles: { fontSize: 11 },
-    margin: { left: margin, right: margin },
-    headStyles: {
-      fillColor: [58, 123, 254],
-      textColor: 255,
-      halign: "left"
-    },
-    didDrawPage: (data) => drawFooter(pdf)
-  });
+    pdf.autoTable({
+        startY: y,
+        theme: "grid",
+        head: [["Description", "Rate", "Qty", "Total"]],
+        body: tableData,
+        styles: { fontSize: 11 },
+        margin: { left: margin, right: margin },
+        headStyles: {
+            fillColor: [0, 62, 138], // Dark Blue
+            textColor: 255,
+            fontStyle: "bold",
+        },
+        didDrawPage: (data) => drawFooter(pdf)
+    });
 
-  let finalY = pdf.lastAutoTable.finalY + 30;
+    let afterTable = pdf.lastAutoTable.finalY + 30;
 
-  /* ============================================================================
+    /* -----------------------------------------------
        TOTAL SUMMARY
-  ============================================================================ */
-  pdf.setFontSize(13);
-  pdf.text("TOTAL SUMMARY", margin, finalY);
-  finalY += 18;
+    ----------------------------------------------- */
+    pdf.setFontSize(13);
+    pdf.text("TOTAL SUMMARY", margin, afterTable);
+    afterTable += 18;
 
-  pdf.setFontSize(11);
-  pdf.text(`Sub Total: ${bill.subtotal}`, margin, finalY);
-  pdf.text(`Discount: ${bill.discount}`, margin + 200, finalY);
-  finalY += 22;
+    pdf.setFontSize(11);
+    pdf.text(`Sub Total: ${bill.subtotal}`, margin, afterTable);
+    pdf.text(`Discount: ${bill.discount}`, margin + 220, afterTable);
+    afterTable += 22;
 
-  pdf.setFontSize(15);
-  pdf.text(`Grand Total: ${bill.total}`, margin, finalY);
-  finalY += 30;
+    pdf.setFontSize(15);
+    pdf.text(`Grand Total: ${bill.total}`, margin, afterTable);
+    afterTable += 26;
 
-  /* ============================================================================
+    /* -----------------------------------------------
        AMOUNT IN WORDS
-  ============================================================================ */
-  const numericTotal = parseInt(bill.total.replace(/[₹,]/g, ""));
-  const words = amountInWords(numericTotal);
+    ----------------------------------------------- */
+    const numericTotal = parseInt(bill.total.replace(/[₹,]/g, ""));
+    const words = inrToWords(numericTotal);
 
-  pdf.setFontSize(11);
-  pdf.text(`Amount in Words: ${words}`, margin, finalY, {
-    maxWidth: pageWidth - margin * 2,
-  });
+    pdf.setFontSize(11);
+    pdf.text(`Amount in Words: ${words}`, margin, afterTable, {
+        maxWidth: pageWidth - margin * 2
+    });
 
-  /* ============================================================================
-       FINAL SAVE
-  ============================================================================ */
-  pdf.save(`${bill.bill_no}.pdf`);
+    /* -----------------------------------------------
+       SAVE PDF
+    ----------------------------------------------- */
+    pdf.save(`${bill.bill_no}.pdf`);
 }
 
-/* ============================================================================
-   FOOTER — Tamil footer
-============================================================================ */
+/* -----------------------------------------------
+   FOOTER (Tamil optional)
+----------------------------------------------- */
 function drawFooter(pdf) {
-  const h = pdf.internal.pageSize.getHeight();
-  const cx = pdf.internal.pageSize.getWidth() / 2;
+    const h = pdf.internal.pageSize.getHeight();
+    const cx = pdf.internal.pageSize.getWidth() / 2;
 
-  pdf.setFontSize(11);
-  pdf.setTextColor(60, 60, 60);
+    pdf.setFontSize(10);
+    pdf.setTextColor(70, 70, 70);
 
-  pdf.text("CLINIC TIMINGS", cx, h - 60, { align: "center" });
-  pdf.text("பார்வை நுரை, காலை 9.00 – 9.00 மணியரை", cx, h - 40, { align: "center" });
-  pdf.text("ஞாயிறு: முன்பதிவு மட்டும்", cx, h - 22, { align: "center" });
+    pdf.text("CLINIC TIMINGS", cx, h - 45, { align: "center" });
+    pdf.text("பார்வை நேரம்: காலை 9.00 – இரவு 9.00 மணி", cx, h - 30, { align: "center" });
+    pdf.text("ஞாயிறு: முன்பதிவு மட்டும்", cx, h - 15, { align: "center" });
 }
 
-/* ============================================================================
-   COLLECT DATA FROM UI (Used by both preview + PDF)
-============================================================================ */
-function collectBillData() {
-  return {
-    bill_no: $("bill_no").value,
-    patient_id: $("patient_id").value,
-
-    name: $("p_name").value,
-    age: $("p_age").value,
-    gender: $("p_gender").value,
-    doctor: $("p_doctor").value,
-
-    doa: $("p_doa").value,
-    dod: $("p_dod").value,
-    adm: $("p_adm_time").value,
-    dis: $("p_dis_time").value,
-
-    date: $("bill_date").value,
-    time: $("bill_time").value,
-
-    subtotal: $("subTotal").textContent,
-    discount: $("discount_amount").value,
-    total: $("grandTotal").textContent,
-
-    charges: qsa("#chargesTable tbody tr").map((r) => ({
-      desc: r.querySelector(".desc").value,
-      rate: Number(r.querySelector(".rate").value),
-      qty: Number(r.querySelector(".qty").value),
-    })),
-  };
-}
-
-/* ============================================================================
-   GET HOSPITAL SETTINGS (IndexedDB)
-============================================================================ */
+/* -----------------------------------------------
+   HOSPITAL SETTINGS LOADER
+----------------------------------------------- */
 function getHospitalSettings() {
-  return new Promise((resolve) => {
-    const req = indexedDB.open("KCC_Billing_DB_V4", 7);
+    return new Promise(resolve => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
 
-    req.onsuccess = () => {
-      const db = req.result;
-      const tx = db.transaction("settings", "readonly");
-      const store = tx.objectStore("settings");
-
-      store.get("hospital").onsuccess = (e) =>
-        resolve(e.target.result || {});
-    };
-  });
+        req.onsuccess = () => {
+            const dbx = req.result;
+            const tx = dbx.transaction("settings", "readonly");
+            tx.objectStore("settings").get("hospital").onsuccess = (e) => {
+                resolve(e.target.result || {});
+            };
+        };
+    });
 }
