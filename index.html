@@ -1,55 +1,53 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="ceramic">
 <head>
-  <meta charset="UTF-8">
-  <title>Krishna Kidney Centre — Billing OS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/bill-template.css">
-  <link rel="stylesheet" href="assets/css/admin.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KCC Billing OS — Krishna Kidney Centre</title>
 
   <!-- FONTS -->
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 
-  <!-- JS LIBRARIES -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- VENDOR SCRIPTS -->
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/jspdf.autotable.min.js"></script>
+  <script src="vendor/html2canvas.min.js"></script>
+
 </head>
-
 <body>
 
 <!-- ============================================================
-     SIDEBAR — VisionOS Ceramic Glass V3
+     SIDEBAR — HF OS Ceramic
 ============================================================ -->
 <aside class="sidebar">
   <div class="sidebar-header">
-    <img src="assets/img/kcc-logo.png" class="sidebar-logo">
+    <img src="assets/logo.png" class="sidebar-logo" alt="Hospital Logo">
     <h2>Krishna Kidney Centre</h2>
+    <p class="tagline">Billing Operating System</p>
   </div>
 
   <nav class="sidebar-nav">
-    <button class="nav-btn active" data-target="dashboardPage">🏥 Dashboard</button>
+    <button class="nav-btn active" data-target="dashboardPage">🏠 Dashboard</button>
     <button class="nav-btn" data-target="newBillPage">🧾 New Bill</button>
     <button class="nav-btn" data-target="tariffPage">📋 Tariff Master</button>
-    <button class="nav-btn" data-target="billsPage">📁 Bills History</button>
-    <button class="nav-btn" data-target="adminPage">🛂 Admin Panel</button>
-    <button class="nav-btn" data-target="settingsPage">⚙️ Settings</button>
+    <button class="nav-btn" data-target="billsPage">📁 Bill History</button>
+    <button class="nav-btn" data-target="settingsPage">🏥 Hospital Settings</button>
+    <button class="nav-btn admin-btn" onclick="window.location.href='admin.html'">🔐 Admin Portal</button>
   </nav>
 </aside>
 
 
-
 <!-- ============================================================
-     MAIN SHELL — FLOATING PANELS
+     MAIN SHELL (VisionOS Floating Shell)
 ============================================================ -->
 <main class="main-shell">
 
 
-
 <!-- ============================================================
-     PAGE 1 — DASHBOARD
+     PAGE — DASHBOARD
 ============================================================ -->
 <section id="dashboardPage" class="page active-page floating-panel">
   <h1>Dashboard</h1>
@@ -58,31 +56,25 @@
 
     <div class="dash-card">
       <h3>Create New Bill</h3>
-      <p>Start a new patient billing entry.</p>
-      <button class="btn primary" onclick="openPage('newBillPage')">Create →</button>
+      <p>Start a new patient bill</p>
+      <button class="btn primary" onclick="openPage('newBillPage')">Start →</button>
     </div>
 
     <div class="dash-card">
-      <h3>Saved Bills</h3>
-      <p>View all previously saved bills.</p>
+      <h3>Bill History</h3>
+      <p>View or edit previous bills</p>
       <button class="btn" onclick="openPage('billsPage')">Open →</button>
     </div>
 
     <div class="dash-card">
       <h3>Tariff Master</h3>
-      <p>Manage your procedure tariff list.</p>
+      <p>Manage rate sheets</p>
       <button class="btn" onclick="openPage('tariffPage')">Manage →</button>
     </div>
 
     <div class="dash-card">
-      <h3>Admin Panel</h3>
-      <p>Manage staff, doctors and departments.</p>
-      <button class="btn" onclick="openPage('adminPage')">Open →</button>
-    </div>
-
-    <div class="dash-card">
       <h3>Hospital Settings</h3>
-      <p>Configure hospital details & logo.</p>
+      <p>Configure hospital details</p>
       <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
 
@@ -91,10 +83,8 @@
 
 
 
-
-
 <!-- ============================================================
-     PAGE 2 — NEW BILL PAGE
+     PAGE — NEW BILL
 ============================================================ -->
 <section id="newBillPage" class="page floating-panel">
   <h1>New Bill</h1>
@@ -102,46 +92,38 @@
   <!-- BILL INFO -->
   <div class="card">
     <h2>Bill Information</h2>
-
     <div class="grid-3">
       <div>
         <label>Bill No</label>
         <input id="bill_no" disabled>
       </div>
-
       <div>
-        <label>Bill Date</label>
+        <label>Date</label>
         <input id="bill_date" type="date">
       </div>
-
       <div>
-        <label>Bill Time</label>
+        <label>Time</label>
         <input id="bill_time" type="time">
       </div>
     </div>
   </div>
 
-
   <!-- PATIENT INFO -->
   <div class="card">
     <h2>Patient Information</h2>
-
     <div class="grid-3">
       <div>
         <label>UHID</label>
         <input id="patient_id" disabled>
       </div>
-
       <div>
         <label>Patient Name</label>
         <input id="p_name">
       </div>
-
       <div>
         <label>Age</label>
         <input id="p_age" type="number">
       </div>
-
       <div>
         <label>Gender</label>
         <select id="p_gender">
@@ -149,56 +131,43 @@
           <option>Female</option>
         </select>
       </div>
-
       <div>
         <label>Doctor Name</label>
-        <select id="p_doctor"></select>
-      </div>
-
-      <div>
-        <label>File Number</label>
-        <input id="p_file_no">
+        <input id="p_doctor">
       </div>
     </div>
 
-    <div class="grid-2" style="margin-top:20px;">
+    <div class="grid-2">
       <div>
         <label>Date of Admission</label>
         <input id="p_doa" type="date">
       </div>
-
       <div>
         <label>Date of Discharge</label>
         <input id="p_dod" type="date">
       </div>
     </div>
 
-    <div class="grid-2" style="margin-top:20px;">
+    <div class="grid-2">
       <div>
         <label>Admission Time</label>
         <input id="p_adm_time" type="time">
       </div>
-
       <div>
         <label>Discharge Time</label>
         <input id="p_dis_time" type="time">
       </div>
     </div>
-
-    <div style="margin-top:20px;">
-       <label>Patient Address</label>
-       <textarea id="p_address" rows="2"></textarea>
-    </div>
   </div>
 
-
-  <!-- CHARGES -->
+  <!-- CHARGES TABLE -->
   <div class="card">
     <div class="table-header">
       <h2>Charges</h2>
-
-      <div style="display:flex; gap:10px;">
-        <select id="procedureSelect"></select>
+      <div class="table-actions">
+        <select id="procedureSelect">
+          <option value="">Select Tariff</option>
+        </select>
         <button id="addRowBtn" class="btn">+ Add Item</button>
       </div>
     </div>
@@ -217,24 +186,20 @@
     </table>
   </div>
 
-
-  <!-- DISCOUNT + INSURANCE -->
+  <!-- DISCOUNT -->
   <div class="card">
-    <h2>Discount / Insurance</h2>
-
+    <h2>Discount</h2>
     <div class="grid-3">
       <div>
         <label>Discount (%)</label>
         <input id="discount_percent" type="number" value="0">
       </div>
-
       <div>
         <label>Discount (₹)</label>
         <input id="discount_amount" type="number" value="0">
       </div>
-
       <div>
-        <label>Insurance Mode</label>
+        <label>Insurance</label>
         <select id="insurance_mode">
           <option value="no">No</option>
           <option value="yes">Yes</option>
@@ -243,83 +208,80 @@
     </div>
   </div>
 
-
-  <!-- TOTALS -->
+  <!-- TOTAL + ACTIONS -->
   <div class="card total-box">
     <div class="total-meta">
-      <div class="meta-line"><span>Sub Total:</span><strong id="subTotal">₹0</strong></div>
-      <div class="meta-line"><span>Discount:</span><strong id="discountValue">₹0</strong></div>
+      <div class="meta-line">
+        <span>Sub Total:</span>
+        <strong id="subTotal">₹0</strong>
+      </div>
+      <div class="meta-line">
+        <span>Discount Applied:</span>
+        <strong id="discountValue">₹0</strong>
+      </div>
     </div>
 
     <div class="total-line">
-      <label>Grand Total:</label>
+      <label>Total Amount:</label>
       <span id="grandTotal">₹0</span>
     </div>
 
     <div class="action-buttons">
-      <button id="loadDemoBill" class="btn ghost">Load Sample Bill</button>
+      <button id="loadDemoBill" class="btn ghost">Load Demo</button>
       <button id="saveBill" class="btn primary">Save Bill</button>
       <button id="exportPDF" class="btn">Export PDF</button>
     </div>
   </div>
+
 </section>
 
 
 
-
-
 <!-- ============================================================
-     PAGE 3 — TARIFF MASTER
+     PAGE — TARIFF MASTER
 ============================================================ -->
 <section id="tariffPage" class="page floating-panel">
   <h1>Tariff Master</h1>
 
   <div class="card">
-    <h2>Add Procedure</h2>
-
+    <h2>Add Tariff Item</h2>
     <div class="grid-3">
       <div>
         <label>Procedure Name</label>
         <input id="tariff_name">
       </div>
-
       <div>
-        <label>Rate</label>
+        <label>Rate (₹)</label>
         <input id="tariff_rate" type="number">
       </div>
-
       <div>
-        <button id="saveTariff" class="btn primary" style="margin-top:25px;">Save</button>
+        <button id="saveTariff" class="btn primary" style="margin-top:30px;">Save</button>
       </div>
     </div>
   </div>
 
   <div class="card">
     <h2>Tariff List</h2>
-
     <table id="tariffTable">
       <thead>
         <tr>
           <th>Procedure</th>
-          <th>Rate (₹)</th>
+          <th>Rate</th>
           <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
-
 </section>
 
 
 
-
-
 <!-- ============================================================
-     PAGE 4 — BILLS HISTORY
+     PAGE — BILL HISTORY
 ============================================================ -->
 <section id="billsPage" class="page floating-panel">
-  <h1>Bills History</h1>
+  <h1>Bill History</h1>
 
   <div class="card">
     <table id="billsTable">
@@ -327,7 +289,7 @@
         <tr>
           <th>Bill No</th>
           <th>Patient ID</th>
-          <th>Patient Name</th>
+          <th>Name</th>
           <th>Date</th>
           <th>Total</th>
           <th></th>
@@ -340,70 +302,14 @@
 
 
 
-
-
 <!-- ============================================================
-     PAGE 5 — ADMIN PANEL
-============================================================ -->
-<section id="adminPage" class="page floating-panel">
-  <h1>Admin Panel</h1>
-
-  <div class="admin-grid">
-
-    <!-- STAFF -->
-    <div class="admin-card">
-      <h2>Manage Staff</h2>
-
-      <div class="grid-2">
-        <input id="staff_name" placeholder="Staff Name">
-        <input id="staff_role" placeholder="Role">
-      </div>
-
-      <div class="grid-2" style="margin-top:10px;">
-        <input id="staff_phone" placeholder="Phone">
-        <button class="btn primary" onclick="addStaff()">Add Staff</button>
-      </div>
-
-      <table class="admin-table" id="staffTable">
-        <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- DOCTORS -->
-    <div class="admin-card">
-      <h2>Manage Doctors</h2>
-
-      <div class="grid-2">
-        <input id="doc_name" placeholder="Doctor Name">
-        <input id="doc_spec" placeholder="Specialization">
-      </div>
-
-      <div class="grid-2" style="margin-top:10px;">
-        <input id="doc_phone" placeholder="Phone">
-        <button class="btn primary" onclick="addDoctor()">Add Doctor</button>
-      </div>
-
-      <table class="admin-table" id="doctorTable">
-        <thead><tr><th>Name</th><th>Spec</th><th>Phone</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-  </div>
-</section>
-
-
-
-
-
-<!-- ============================================================
-     PAGE 6 — SETTINGS
+     PAGE — SETTINGS
 ============================================================ -->
 <section id="settingsPage" class="page floating-panel">
   <h1>Hospital Settings</h1>
 
   <div class="card">
+    <h2>Hospital Details</h2>
 
     <label>Hospital Name</label>
     <input id="set_h_name">
@@ -420,7 +326,7 @@
     <label>GST Number</label>
     <input id="set_h_gst">
 
-    <label>Upload Hospital Logo</label>
+    <label>Upload Logo</label>
     <input id="set_h_logo" type="file">
 
     <button id="saveSettings" class="btn primary" style="margin-top:20px;">Save Settings</button>
@@ -428,26 +334,15 @@
 </section>
 
 
-
-
-
-<!-- ============================================================
-     HIDDEN PREMIUM PDF & RECEIPT TEMPLATES
-============================================================ -->
-<div id="pdfTemplates" style="display:none;">
-  <?php include "templates/bill-template.html"; ?>
-  <?php include "templates/receipt-template.html"; ?>
-</div>
-
+</main>
 
 
 <!-- ============================================================
      JS ENGINE
 ============================================================ -->
-<script src="assets/js/utils.js"></script>
-<script src="assets/js/admin.js"></script>
-<script src="assets/js/app.js"></script>
-<script src="assets/js/pdf-engine.js"></script>
+<script src="app.js"></script>
+<script src="pdf/amount-in-words.js"></script>
+<script src="pdf/pdf-engine.js"></script>
 
 </body>
 </html>
