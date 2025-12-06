@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="ceramic">
 <head>
-  <meta charset="UTF-8">
-  <title>KCC Admin Panel — HealthFlo OS</title>
+  <meta charset="UTF-8" />
+  <title>Admin Panel — Krishna Kidney Centre</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="admin.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
 
   <!-- JS -->
   <script defer src="admin.js"></script>
@@ -14,120 +16,180 @@
 
 <body>
 
-<div class="admin-wrapper">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h2 class="logo">KCC Admin</h2>
 
-  <!-- ============================================================
-       PAGE TITLE + ACTIONS
-  ============================================================ -->
-  <h1 class="admin-title">Admin Control Panel</h1>
+  <nav>
+    <button class="nav-btn active" data-target="doctorsPage">
+      <i class="ri-stethoscope-line"></i> Doctors
+    </button>
 
-  <div class="admin-action-bar">
-    <button class="btn-primary" onclick="openAddModal('doctor')">+ Add Doctor</button>
-    <button class="btn-primary" onclick="openAddModal('staff')">+ Add Staff</button>
-    <button class="btn-primary" onclick="openAddModal('department')">+ Add Department</button>
+    <button class="nav-btn" data-target="staffPage">
+      <i class="ri-user-3-line"></i> Staff
+    </button>
+
+    <button class="nav-btn" data-target="rolesPage">
+      <i class="ri-shield-user-line"></i> Roles / Permissions
+    </button>
+
+    <a href="index.html" class="nav-link-exit">
+      ← Back to Billing OS
+    </a>
+  </nav>
+</aside>
+
+
+<!-- MAIN SHELL -->
+<main class="main-shell">
+
+
+<!-- PAGE 1 — DOCTORS -->
+<section id="doctorsPage" class="page active-page floating-panel">
+  <h1>Doctors Master</h1>
+
+  <div class="card">
+    <h2>Add / Edit Doctor</h2>
+
+    <div class="grid-2">
+      <div>
+        <label>Doctor Name</label>
+        <input id="doc_name">
+      </div>
+
+      <div>
+        <label>Specialization</label>
+        <input id="doc_specialization">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Phone</label>
+        <input id="doc_phone">
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input id="doc_email" type="email">
+      </div>
+    </div>
+
+    <button id="saveDoctor" class="btn primary" style="margin-top:20px;">Save Doctor</button>
   </div>
 
+  <div class="card">
+    <h2>Doctors List</h2>
 
-  <!-- ============================================================
-       TABS
-  ============================================================ -->
-  <div class="filter-bar">
-    <select id="adminTabFilter" onchange="switchTab(this.value)">
-      <option value="doctorsTab">Doctors</option>
-      <option value="staffTab">Staff</option>
-      <option value="departmentsTab">Departments</option>
-    </select>
-
-    <input id="searchBox" placeholder="Search…" oninput="adminSearch()">
-  </div>
-
-
-  <!-- ============================================================
-       DOCTORS TABLE
-  ============================================================ -->
-  <section id="doctorsTab" class="table-card">
-    <h2>Doctors</h2>
-
-    <table class="admin-table" id="doctorTable">
+    <table id="doctorTable">
       <thead>
         <tr>
           <th>Name</th>
           <th>Specialization</th>
           <th>Phone</th>
-          <th>Updated On</th>
-          <th>Actions</th>
+          <th>Email</th>
+          <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
+  </div>
+</section>
 
 
-  <!-- ============================================================
-       STAFF TABLE
-  ============================================================ -->
-  <section id="staffTab" class="table-card" style="display:none;">
-    <h2>Staff</h2>
+<!-- PAGE 2 — STAFF -->
+<section id="staffPage" class="page floating-panel">
+  <h1>Staff Master</h1>
 
-    <table class="admin-table" id="staffTable">
+  <div class="card">
+    <h2>Add / Edit Staff</h2>
+
+    <div class="grid-2">
+      <div>
+        <label>Name</label>
+        <input id="staff_name">
+      </div>
+
+      <div>
+        <label>Role</label>
+        <select id="staff_role"></select>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label>Phone</label>
+        <input id="staff_phone">
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input id="staff_email">
+      </div>
+    </div>
+
+    <button id="saveStaff" class="btn primary" style="margin-top:20px;">Save Staff</button>
+  </div>
+
+  <div class="card">
+    <h2>Staff List</h2>
+
+    <table id="staffTable">
       <thead>
         <tr>
           <th>Name</th>
           <th>Role</th>
           <th>Phone</th>
-          <th>Updated On</th>
-          <th>Actions</th>
+          <th>Email</th>
+          <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
+  </div>
+</section>
 
 
-  <!-- ============================================================
-       DEPARTMENTS TABLE
-  ============================================================ -->
-  <section id="departmentsTab" class="table-card" style="display:none;">
-    <h2>Departments</h2>
+<!-- PAGE 3 — ROLES & PERMISSIONS -->
+<section id="rolesPage" class="page floating-panel">
+  <h1>Roles & Permissions</h1>
 
-    <table class="admin-table" id="departmentTable">
+  <div class="card">
+    <h2>Create Role</h2>
+
+    <label>Role Name</label>
+    <input id="role_name">
+
+    <label>Permissions</label>
+    <div class="permissions-box">
+      <label><input type="checkbox" value="create_bill"> Create Bill</label>
+      <label><input type="checkbox" value="edit_bill"> Edit Bill</label>
+      <label><input type="checkbox" value="delete_bill"> Delete Bill</label>
+      <label><input type="checkbox" value="view_reports"> View Reports</label>
+      <label><input type="checkbox" value="manage_tariff"> Manage Tariff</label>
+      <label><input type="checkbox" value="manage_staff"> Manage Staff/Doctors</label>
+    </div>
+
+    <button id="saveRole" class="btn primary" style="margin-top:20px;">Save Role</button>
+  </div>
+
+  <div class="card">
+    <h2>Roles List</h2>
+
+    <table id="rolesTable">
       <thead>
         <tr>
-          <th>Department</th>
-          <th>Head</th>
-          <th>Updated On</th>
-          <th>Actions</th>
+          <th>Role</th>
+          <th>Permissions</th>
+          <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
-
-
-</div> <!-- admin-wrapper end -->
-
-
-
-<!-- ============================================================
-     MODAL (VisionOS Floating Add / Edit)
-============================================================ -->
-<div id="adminModalBackdrop">
-  <div id="adminModal">
-
-    <h2 class="modal-title" id="modalTitle">Add Item</h2>
-
-    <div class="modal-grid" id="modalFields">
-      <!-- Dynamic fields injected by JS -->
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveAdminItem()">Save</button>
-    </div>
-
   </div>
-</div>
+</section>
 
+</main>
 
 </body>
 </html>
