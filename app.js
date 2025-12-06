@@ -14,6 +14,12 @@
 /* ========== ELEMENT SELECTOR ========== */
 const $ = (id) => document.getElementById(id);
 
+const formatINR = (value = 0) => "₹" + Number(value || 0).toLocaleString("en-IN");
+const safeNumber = (value) => {
+  const num = parseFloat(value);
+  return isNaN(num) ? 0 : num;
+};
+
 /* ========== PAGE SWITCHING ENGINE ========== */
 document.querySelectorAll(".nav-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -63,6 +69,7 @@ dbReq.onsuccess = function (e) {
   loadTariffList();
   loadBillsList();
   prepareNewBill();
+  seedDemoData();
 };
 
 
@@ -83,6 +90,43 @@ function generateBillNo() {
 function generatePatientID() {
   return generateRandomID("KCC-PAT");
 }
+
+const demoCharges = [
+  { desc: "Surgeon Fees", rate: 150000, qty: 1 },
+  { desc: "Assistant Surgeon Fees", rate: 15000, qty: 1 },
+  { desc: "DI Stenting", rate: 1300, qty: 1 },
+  { desc: "Anaesthesia Fees", rate: 6000, qty: 1 },
+  { desc: "ICU Charges", rate: 1500, qty: 2 },
+  { desc: "Speciality Doctor ICU Visit", rate: 1500, qty: 2 },
+  { desc: "Bed Charge", rate: 450, qty: 1 },
+  { desc: "Nursing Charges", rate: 100, qty: 1 },
+  { desc: "Medicine & Surgical", rate: 650, qty: 1 },
+  { desc: "Diagnostic & Procedure", rate: 650, qty: 1 },
+  { desc: "Lab Charges", rate: 800, qty: 1 },
+  { desc: "Processing Charges", rate: 325, qty: 1 },
+  { desc: "CGST 9%", rate: 9, qty: 2 },
+  { desc: "SGST 9%", rate: 9, qty: 2 },
+];
+
+const demoBillData = {
+  bill_no: "KCC-BILL-73579",
+  patient_id: "MR-73579",
+  name: "Mr. Praveen Kumar",
+  age: 36,
+  gender: "Male",
+  doctor: "Dr. B.K. Srinivasan",
+  doa: "2025-09-27",
+  dod: "2025-09-28",
+  adm_time: "09:30",
+  dis_time: "11:00",
+  date: "2025-09-28",
+  time: "11:00",
+  insurance: "no",
+  discount_percent: 0,
+  discount_amount: 21018,
+  total: formatINR(160293),
+  charges: demoCharges,
+};
 
 
 
@@ -129,33 +173,46 @@ tableBody.addEventListener("click", (e) => {
   }
 });
 
+["discount_percent", "discount_amount"].forEach((id) =>
+  $(id).addEventListener("input", updateTotals)
+);
+
 
 /* ================================================================
    TOTAL CALCULATION ENGINE
 ================================================================ */
-function updateTotals() {
+function calculateTotals() {
   let total = 0;
 
   document.querySelectorAll("#chargesTable tbody tr").forEach((row) => {
-    let rate = parseFloat(row.querySelector(".rate").value || 0);
-    let qty = parseFloat(row.querySelector(".qty").value || 0);
+    let rate = safeNumber(row.querySelector(".rate").value);
+    let qty = safeNumber(row.querySelector(".qty").value);
     let t = rate * qty;
 
-    row.querySelector(".rowTotal").textContent = "₹" + t.toLocaleString("en-IN");
+    row.querySelector(".rowTotal").textContent = formatINR(t);
     total += t;
   });
 
-  // DISCOUNTS
-  let discountPercent = parseFloat($("discount_percent").value || 0);
-  let discountAmount = parseFloat($("discount_amount").value || 0);
+  let discountPercent = safeNumber($("discount_percent").value);
+  let discountAmount = safeNumber($("discount_amount").value);
 
   if (discountPercent > 0) {
     discountAmount = (total * discountPercent) / 100;
+    $("discount_amount").value = discountAmount.toFixed(0);
   }
 
-  let finalTotal = total - discountAmount;
+  let finalTotal = Math.max(total - discountAmount, 0);
 
-  $("grandTotal").textContent = "₹" + finalTotal.toLocaleString("en-IN");
+  return { total, discountAmount, finalTotal };
+}
+
+function updateTotals() {
+  const { total, discountAmount, finalTotal } = calculateTotals();
+
+  $("subTotal").textContent = formatINR(total);
+  $("discountValue").textContent =
+    discountAmount > 0 ? "-" + formatINR(discountAmount) : formatINR(0);
+  $("grandTotal").textContent = formatINR(finalTotal);
 }
 
 
@@ -242,8 +299,11 @@ $("procedureSelect").addEventListener("change", () => {
    SAVE BILL ENGINE
 ================================================================ */
 $("saveBill").addEventListener("click", saveBill);
+$("loadDemoBill").addEventListener("click", () => openSavedBill(demoBillData.bill_no));
 
 function saveBill() {
+  updateTotals();
+
   let charges = [];
 
   document.querySelectorAll("#chargesTable tbody tr").forEach((r) => {
@@ -315,8 +375,13 @@ function openSavedBill(bill_no) {
   tx.objectStore("bills").get(bill_no).onsuccess = (e) => {
     let b = e.target.result;
 
-    openPage("newBillPage");
+    if (!b) {
+      alert("Saved bill not found in the system.");
+      return;
+    }
 
+    openPage("newBillPage");
+     
     $("bill_no").value = b.bill_no;
     $("patient_id").value = b.patient_id;
     $("p_name").value = b.name;
@@ -396,6 +461,51 @@ function loadSettings() {
 
 
 /* ================================================================
+   DEMO DATA SEEDER (Preloads Krishna Kidney Centre bill)
+================================================================ */
+function seedDemoData() {
+  const defaultSettings = {
+    id: "hospital",
+    name: "Krishna Kidney Centre",
+    address: "No. 1/375-7, Rayakottai Main Road, Near Flyover, Krishnagiri - 635001",
+    phone: "8300224589 / 9442318169",
+    email: "bksrinivasan1980@yahoo.com",
+    gst: "",
+  };
+
+  const settingsTx = DB.transaction("settings", "readwrite");
+  const settingsStore = settingsTx.objectStore("settings");
+  settingsStore.get("hospital").onsuccess = (e) => {
+    if (!e.target.result) {
+      settingsStore.put(defaultSettings);
+    }
+  };
+  settingsTx.oncomplete = () => loadSettings();
+
+  const tariffTx = DB.transaction("tariffs", "readwrite");
+  const tariffStore = tariffTx.objectStore("tariffs");
+  demoCharges.forEach((c) => tariffStore.put({ name: c.desc, rate: c.rate }));
+  tariffTx.oncomplete = () => {
+    loadTariffList();
+    loadTariffDropdown();
+  };
+
+  const billTx = DB.transaction("bills", "readwrite");
+  const billStore = billTx.objectStore("bills");
+  billStore.get(demoBillData.bill_no).onsuccess = (e) => {
+    if (!e.target.result) {
+      billStore.put(demoBillData);
+    }
+  };
+  billTx.oncomplete = () => {
+    loadBillsList();
+    openSavedBill(demoBillData.bill_no);
+  };
+}
+
+
+
+/* ================================================================
    PDF EXPORT ENGINE — Ceramic v2 Premium
 ================================================================ */
 
@@ -404,6 +514,9 @@ $("exportPDF").addEventListener("click", exportPDF);
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  updateTotals();
+  const totals = calculateTotals();
 
   /* -------- HEADER -------- */
   doc.setFont("Helvetica", "bold");
@@ -444,11 +557,13 @@ function exportPDF() {
   let body = [];
 
   document.querySelectorAll("#chargesTable tbody tr").forEach((r) => {
+    const rate = safeNumber(r.querySelector(".rate").value);
+    const qty = safeNumber(r.querySelector(".qty").value);
     body.push([
       r.querySelector(".desc").value,
-      r.querySelector(".rate").value,
-      r.querySelector(".qty").value,
-      (r.querySelector(".rate").value * r.querySelector(".qty").value).toLocaleString("en-IN")
+      formatINR(rate),
+      qty,
+      formatINR(rate * qty),
     ]);
   });
 
@@ -461,16 +576,17 @@ function exportPDF() {
     styles: { fontSize: 11 }
   });
 
-  let finalY = doc.lastAutoTable.finalY + 40;
+  let finalY = doc.lastAutoTable.finalY + 36;
 
   /* -------- DISCOUNT / TOTAL -------- */
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(13);
+  doc.text(`Gross Total: ${formatINR(totals.total)}`, 40, finalY);
+  doc.text(`Discount: ${formatINR(totals.discountAmount)}`, 320, finalY);
+
   doc.setFont("Helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text(
-    "TOTAL : " + $("grandTotal").textContent,
-    40,
-    finalY
-  );
+  doc.setFontSize(16);
+  doc.text(`TOTAL PAYABLE: ${formatINR(totals.finalTotal)}`, 40, finalY + 26);
 
   doc.save($("bill_no").value + ".pdf");
 }
