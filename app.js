@@ -1,12 +1,11 @@
 /* ============================================================================
-   KRISHNA KIDNEY CENTRE — BILLING OS (Ceramic V3)
-   ULTRA-STABLE OFFLINE ENGINE — FINAL PRODUCTION VERSION
-   ✔ Hospital defaults updated (from scanned bill)
-   ✔ Doctor details updated
-   ✔ Tariff defaults updated
-   ✔ Demo patient added
-   ✔ Safe counters (Bill No + UHID)
-   ✔ Fully synced with PDF engine
+   KRISHNA KIDNEY CENTRE — BILLING OS (Ceramic V4)
+   FINAL PRODUCTION BUILD — OFFLINE STABLE
+   ✔ New Bill reset fixed (Option A)
+   ✔ Bill load/edit stable
+   ✔ Tariff, doctor, staff, settings synced
+   ✔ Counters stable
+   ✔ PDF export hook stable
 ============================================================================ */
 
 const $ = (id) => document.getElementById(id);
@@ -75,7 +74,7 @@ req.onsuccess = (e) => {
 };
 
 /* ============================================================================
-   DEFAULT DATA — FIRST RUN ONLY
+   DEFAULT DATA — ONE TIME ONLY
 ============================================================================ */
 
 function preloadHospitalDefaults() {
@@ -83,22 +82,18 @@ function preloadHospitalDefaults() {
   tx.objectStore("settings").get("hospital").onsuccess = (e) => {
     if (e.target.result) return;
 
-    const hospital = {
-      id: "hospital",
-      name: "Krishna Kidney Centre",
-      address:
-        "No.1/375-7, Rayakottai Main Road,\nNear Flyover,\nKrishnagiri - 635001.",
-      phone: "8300224569 / 9442318169",
-      email: "bksrinivasan1980@yahoo.co.in",
-      gst: "",
-      logo: "assets/logo.png",
-      tamil:
-        "பார்வை நுரை, காலை 9.00 – 9.00 மணியரை\nஞாயிறு: முன்பதிவு மட்டும்"
-    };
-
     DB.transaction("settings", "readwrite")
       .objectStore("settings")
-      .put(hospital);
+      .put({
+        id: "hospital",
+        name: "Krishna Kidney Centre",
+        address:
+          "No.1/375-7, Rayakottai Main Road,\nNear Flyover,\nKrishnagiri - 635001.",
+        phone: "8300224569 / 9442318169",
+        email: "bksrinivasan1980@yahoo.co.in",
+        gst: "",
+        logo: "assets/logo.png"
+      });
   };
 }
 
@@ -107,17 +102,15 @@ function preloadDoctorDefaults() {
   tx.objectStore("doctors").getAll().onsuccess = (e) => {
     if (e.target.result.length) return;
 
-    const def = {
-      name: "Dr. B.K. SRINIVASAN",
-      specialization: "M.S., M.Ch (Urology) — Urologist & Andrologist",
-      phone: "8300224569",
-      email: "bksrinivasan1980@yahoo.co.in",
-      reg: "73759"
-    };
-
     DB.transaction("doctors", "readwrite")
       .objectStore("doctors")
-      .put(def);
+      .put({
+        name: "Dr. B.K. SRINIVASAN",
+        specialization: "M.S., M.Ch (Urology) — Urologist & Andrologist",
+        phone: "8300224569",
+        email: "bksrinivasan1980@yahoo.co.in",
+        reg: "73759"
+      });
   };
 }
 
@@ -148,39 +141,35 @@ function preloadTariffDefaults() {
 }
 
 /* ============================================================================
-   BILL NUMBER GENERATOR
+   COUNTERS
 ============================================================================ */
 
 function nextBillNo(cb) {
   const key = "bill_counter";
-
   const tx = DB.transaction("settings", "readwrite");
   const store = tx.objectStore("settings");
 
   store.get(key).onsuccess = (e) => {
     let x = e.target.result ? e.target.result.value : 1;
     store.put({ id: key, value: x + 1 });
-
     cb(`KCC-${String(x).padStart(5, "0")}`);
   };
 }
 
 function nextUHID(cb) {
   const key = "uhid_counter";
-
   const tx = DB.transaction("settings", "readwrite");
   const store = tx.objectStore("settings");
 
   store.get(key).onsuccess = (e) => {
     let x = e.target.result ? e.target.result.value : 1;
     store.put({ id: key, value: x + 1 });
-
     cb(`MR-${String(x).padStart(5, "0")}`);
   };
 }
 
 /* ============================================================================
-   PREPARE NEW BILL
+   PREPARE NEW BILL — FINAL (Option A)
 ============================================================================ */
 
 function prepareNewBill() {
@@ -189,6 +178,15 @@ function prepareNewBill() {
 
   $("bill_date").value = new Date().toISOString().slice(0, 10);
   $("bill_time").value = new Date().toTimeString().slice(0, 5);
+
+  $("p_name").value = "";
+  $("p_age").value = "";
+  $("p_gender").value = "Male";
+  $("p_doctor").value = "";
+  $("p_doa").value = "";
+  $("p_dod").value = "";
+  $("p_adm_time").value = "";
+  $("p_dis_time").value = "";
 
   $("discount_percent").value = 0;
   $("discount_amount").value = 0;
@@ -207,7 +205,6 @@ const tbody = qs("#chargesTable tbody");
 
 function addRow(desc = "", rate = "", qty = 1) {
   const tr = document.createElement("tr");
-
   tr.innerHTML = `
     <td><input class="desc" value="${desc}"></td>
     <td><input class="rate" type="number" value="${rate}"></td>
@@ -215,7 +212,6 @@ function addRow(desc = "", rate = "", qty = 1) {
     <td class="rowTotal">₹0</td>
     <td><button class="delete-row">X</button></td>
   `;
-
   tbody.appendChild(tr);
   updateTotals();
 }
@@ -229,7 +225,7 @@ tbody.addEventListener("click", (e) => {
 });
 
 /* ============================================================================
-   TOTAL CALC ENGINE
+   TOTAL CALC
 ============================================================================ */
 ["discount_percent", "discount_amount"].forEach((id) =>
   $(id).addEventListener("input", updateTotals)
@@ -265,14 +261,14 @@ function calculateTotals() {
 function updateTotals() {
   const t = calculateTotals();
   $("subTotal").textContent = INR(t.gross);
-  $("discountValue").textContent =
-    t.dA > 0 ? "-" + INR(t.dA) : INR(0);
+  $("discountValue").textContent = t.dA > 0 ? "-" + INR(t.dA) : INR(0);
   $("grandTotal").textContent = INR(t.final);
 }
 
 /* ============================================================================
-   TARIFF SYSTEM
+   TARIFF MASTER
 ============================================================================ */
+
 $("saveTariff").onclick = saveTariff;
 
 function saveTariff() {
@@ -336,15 +332,17 @@ $("procedureSelect").onchange = () => {
   const name = $("procedureSelect").value;
   if (!name) return;
 
-  const tx = DB.transaction("tariffs", "readonly");
-  tx.objectStore("tariffs").get(name).onsuccess = (e) => {
-    addRow(name, e.target.result.rate, 1);
-  };
+  DB.transaction("tariffs", "readonly")
+    .objectStore("tariffs")
+    .get(name).onsuccess = (e) => {
+      addRow(name, e.target.result.rate, 1);
+    };
 };
 
 /* ============================================================================
    SAVE BILL
 ============================================================================ */
+
 $("saveBill").onclick = saveBill;
 
 function saveBill() {
@@ -363,16 +361,20 @@ function saveBill() {
     age: $("p_age").value,
     gender: $("p_gender").value,
     doctor: $("p_doctor").value,
+
     doa: $("p_doa").value,
     dod: $("p_dod").value,
     adm: $("p_adm_time").value,
     dis: $("p_dis_time").value,
+
     date: $("bill_date").value,
     time: $("bill_time").value,
+
     discount_percent: $("discount_percent").value,
     discount_amount: $("discount_amount").value,
-    total: $("grandTotal").textContent,
     insurance: $("insurance_mode").value,
+
+    total: $("grandTotal").textContent,
     charges,
     paid: true
   };
@@ -388,6 +390,7 @@ function saveBill() {
 /* ============================================================================
    BILL HISTORY
 ============================================================================ */
+
 function loadBillsList() {
   DB.transaction("bills", "readonly")
     .objectStore("bills")
@@ -450,6 +453,7 @@ function openBill(id) {
 /* ============================================================================
    DOCTOR MASTER
 ============================================================================ */
+
 function loadDoctorsTable() {
   const tx = DB.transaction("doctors", "readonly");
   tx.objectStore("doctors").getAll().onsuccess = (e) => {
@@ -489,6 +493,7 @@ $("saveDoctor").onclick = () => {
 /* ============================================================================
    STAFF MASTER
 ============================================================================ */
+
 function loadStaffTable() {
   const tx = DB.transaction("staff", "readonly");
   tx.objectStore("staff").getAll().onsuccess = (e) => {
@@ -528,6 +533,7 @@ $("saveStaff").onclick = () => {
 /* ============================================================================
    SETTINGS
 ============================================================================ */
+
 $("saveSettings").onclick = saveSettings;
 
 function saveSettings() {
@@ -571,8 +577,9 @@ function loadSettings() {
 }
 
 /* ============================================================================
-   DEMO BILL — (FROM SCANNED BILL)
+   DEMO BILL
 ============================================================================ */
+
 $("loadDemoBill").onclick = () => {
   openPage("newBillPage");
 
@@ -583,7 +590,6 @@ $("loadDemoBill").onclick = () => {
 
   $("p_doa").value = "2025-09-27";
   $("p_dod").value = "2025-09-28";
-
   $("p_adm_time").value = "09:30";
   $("p_dis_time").value = "12:00";
 
@@ -613,11 +619,13 @@ $("loadDemoBill").onclick = () => {
 /* ============================================================================
    PDF EXPORT HOOK
 ============================================================================ */
+
 $("exportPDF").onclick = () => exportPremiumPDF();
 
 /* ============================================================================
    ADMIN TAB SWITCHING
 ============================================================================ */
+
 document.querySelectorAll(".admin-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document
