@@ -1,34 +1,42 @@
 /* ============================================================================
    KRISHNA KIDNEY CENTRE — Billing OS
-   CERAMIC V3 — VisionOS Floating UI System
-   Ultra-premium, animated, teal + navy medical theme
+   CERAMIC V4 — Modern Hospital UI (Inspired by your reference images)
+   Ultra-premium, soft-gradient, glass, blue+mint medical theme
 ============================================================================ */
 
+/* ============================================================================
+   ROOT COLORS — Modern Medical Palette
+============================================================================ */
 :root {
-  --bg: #eef3f9;
-  --panel: rgba(255,255,255,0.78);
+  /* Background & Panels */
+  --bg: #E9EDF6;
+  --panel: rgba(255,255,255,0.72);
   --panel-strong: rgba(255,255,255,0.88);
-  --border: rgba(170,190,220,0.45);
-  --shadow: 0 28px 55px rgba(0,0,0,0.08);
+  --border: #D5D9E5;
+  --shadow: 0 24px 48px rgba(0,0,0,0.08);
 
-  --text-dark: #0a1930;
-  --text-muted: #586a85;
-  --accent: #0ea5a4;  /* TEAL */
-  --deep-blue: #003e8a; /* NAVY */
-  --danger: #ff4254;
+  /* Text Colors */
+  --text-dark: #1C2331;
+  --text-muted: #6A748A;
 
+  /* Premium Accents (inspired by modern UI you shared) */
+  --accent: #3A7BFE;         /* Blue */
+  --accent-purple: #696CFF;  /* Purple */
+  --accent-mint: #2CC8A5;    /* Mint */
+
+  --deep-blue: #003E8A;      /* Navy for strong text */
+  --danger: #FF5A67;
+
+  /* Radii & Animations */
   --radius: 22px;
   --radius-sm: 16px;
-
   --sidebar-width: 270px;
   --transition: 0.25s ease;
 }
 
 /* ============================================================================
-   FONT FIXES — TAMIL + PDF SAFE
-   (Invisible enhancement — UI remains exactly same)
+   FONTS — English + Tamil Safe
 ============================================================================ */
-
 @font-face {
   font-family: "Manrope";
   src: local("Manrope"), url("assets/fonts/Manrope-Regular.ttf") format("truetype");
@@ -46,7 +54,6 @@
 /* ============================================================================
    GLOBAL RESET
 ============================================================================ */
-
 * {
   margin: 0;
   padding: 0;
@@ -62,9 +69,8 @@ body {
 }
 
 /* ============================================================================
-   SIDEBAR — VisionOS Glass + Glow
+   SIDEBAR — Floating Glass
 ============================================================================ */
-
 .sidebar {
   position: fixed;
   top: 0;
@@ -72,12 +78,13 @@ body {
   width: var(--sidebar-width);
   height: 100vh;
 
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(24px) saturate(180%);
   border-right: 1px solid var(--border);
-  box-shadow: 6px 0 20px rgba(0,0,0,0.04);
+  box-shadow: 8px 0 28px rgba(0,0,0,0.05);
 
   padding: 30px 20px;
+  border-radius: 0 22px 22px 0;
   animation: slideIn 0.6s ease;
   z-index: 20;
 }
@@ -100,7 +107,7 @@ body {
 }
 
 .sidebar h2 {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 800;
   color: var(--deep-blue);
 }
@@ -111,7 +118,7 @@ body {
   color: var(--text-muted);
 }
 
-/* NAV BUTTONS */
+/* Sidebar NAV */
 .sidebar-nav {
   margin-top: 32px;
   display: flex;
@@ -123,8 +130,8 @@ body {
   width: 100%;
   padding: 13px 18px;
 
-  background: rgba(255,255,255,0.6);
-  border: 1px solid rgba(160,180,220,0.25);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(180,190,210,0.4);
   border-radius: var(--radius-sm);
 
   font-size: 15px;
@@ -136,33 +143,32 @@ body {
 }
 
 .nav-btn:hover {
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.92);
   transform: translateX(4px);
 }
 
 .nav-btn.active {
-  background: var(--deep-blue);
+  background: var(--accent);
   color: #fff;
-  border-color: var(--deep-blue);
-  box-shadow: 0 12px 24px rgba(0,62,138,0.25);
+  border-color: var(--accent);
+  box-shadow: 0 12px 26px rgba(58,123,254,0.3);
 }
 
 .admin-btn {
   margin-top: 10px;
-  background: rgba(14,165,164,0.12);
-  border-color: rgba(14,165,164,0.5);
+  background: rgba(58,123,254,0.12);
+  border-color: rgba(58,123,254,0.4);
   color: var(--accent);
 }
 
 .admin-btn:hover {
-  background: rgba(14,165,164,0.2);
+  background: rgba(58,123,254,0.18);
   color: var(--deep-blue);
 }
 
 /* ============================================================================
    MAIN WRAPPER
 ============================================================================ */
-
 .main-shell {
   margin-left: var(--sidebar-width);
   padding: 44px;
@@ -171,16 +177,15 @@ body {
 
 @keyframes fade {
   from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+  to   { opacity: 1; }
 }
 
 /* ============================================================================
-   FLOATING PANELS — VisionOS Frosted Cards
+   FLOATING PANELS — Modern Glass
 ============================================================================ */
-
 .floating-panel {
   background: var(--panel);
-  backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(180%);
   padding: 34px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -189,22 +194,16 @@ body {
 }
 
 @keyframes panelFade {
-  from { opacity: 0; transform: translateY(12px);}
-  to   { opacity: 1; transform: translateY(0);}
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.page {
-  display: none;
-}
-
-.active-page {
-  display: block;
-}
+.page { display: none; }
+.active-page { display: block; }
 
 /* ============================================================================
    HEADINGS
 ============================================================================ */
-
 h1 {
   font-size: 32px;
   font-weight: 800;
@@ -221,10 +220,9 @@ h2 {
 /* ============================================================================
    CARDS
 ============================================================================ */
-
 .card {
   background: var(--panel-strong);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
   padding: 28px;
   margin-top: 30px;
 
@@ -240,9 +238,8 @@ h2 {
 }
 
 /* ============================================================================
-   GRID LAYOUTS
+   GRID
 ============================================================================ */
-
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -258,28 +255,26 @@ h2 {
 /* ============================================================================
    INPUTS
 ============================================================================ */
-
 input, select, textarea {
   width: 100%;
   padding: 14px;
   border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.92);
 
-  border: 1px solid rgba(150,170,210,0.35);
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(165,175,200,0.45);
+
   font-size: 15px;
-
   transition: var(--transition);
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(14,165,164,0.25);
+  box-shadow: 0 0 0 3px rgba(58,123,254,0.25);
 }
 
 /* ============================================================================
-   TABLES
+   TABLES — Clean Hospital Style
 ============================================================================ */
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -288,26 +283,25 @@ table {
 th {
   text-align: left;
   padding: 14px;
-  background: var(--deep-blue);
+  background: var(--accent);
   color: #fff;
-  letter-spacing: 0.3px;
   font-size: 14px;
+  letter-spacing: 0.3px;
 }
 
 td {
   padding: 14px;
-  background: rgba(255,255,255,0.65);
-  border-bottom: 1px solid rgba(180,200,230,0.3);
+  background: rgba(255,255,255,0.7);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
 tbody tr:hover td {
-  background: rgba(200,225,255,0.26);
+  background: rgba(58,123,254,0.08);
 }
 
 /* ============================================================================
-   BUTTONS
+   BUTTONS — Premium Soft UI
 ============================================================================ */
-
 .btn {
   padding: 12px 18px;
   border: none;
@@ -316,24 +310,24 @@ tbody tr:hover td {
   font-weight: 600;
   letter-spacing: 0.3px;
 
-  background: var(--deep-blue);
+  background: var(--accent);
   color: #fff;
   transition: var(--transition);
+  box-shadow: 0 6px 16px rgba(58,123,254,0.25);
 }
 
 .btn:hover {
-  opacity: 0.92;
   transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(58,123,254,0.35);
 }
 
 .primary {
-  background: var(--accent);
-  border: none;
-  box-shadow: 0 14px 28px rgba(14,165,164,0.3);
+  background: var(--accent-mint);
+  box-shadow: 0 12px 24px rgba(44,200,165,0.35);
 }
 
 .primary:hover {
-  background: #0c8f8d;
+  background: #22b493;
 }
 
 .ghost {
@@ -343,7 +337,7 @@ tbody tr:hover td {
 }
 
 .ghost:hover {
-  background: rgba(14,165,164,0.12);
+  background: rgba(150,170,210,0.15);
   color: var(--accent);
 }
 
@@ -355,16 +349,13 @@ tbody tr:hover td {
 }
 
 .delete-row:hover {
-  background: #d93646;
+  background: #e74453;
 }
 
 /* ============================================================================
    TOTAL SECTION
 ============================================================================ */
-
-.total-box {
-  text-align: right;
-}
+.total-box { text-align: right; }
 
 .total-meta {
   display: grid;
@@ -395,7 +386,6 @@ tbody tr:hover td {
 /* ============================================================================
    DASHBOARD CARDS
 ============================================================================ */
-
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
@@ -411,9 +401,7 @@ tbody tr:hover td {
   transition: var(--transition);
 }
 
-.dash-card:hover {
-  transform: translateY(-5px);
-}
+.dash-card:hover { transform: translateY(-5px); }
 
 .dash-card h3 {
   font-size: 18px;
@@ -430,7 +418,6 @@ tbody tr:hover td {
 /* ============================================================================
    RESPONSIVE
 ============================================================================ */
-
 @media (max-width: 980px) {
   .grid-3, .grid-2 { grid-template-columns: 1fr; }
 }
