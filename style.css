@@ -302,6 +302,17 @@ tbody tr:hover {
   background: #1d4ed8;
 }
 
+.ghost {
+  background: transparent;
+  color: var(--text-dark);
+  border: 1px solid rgba(160, 180, 220, 0.6);
+}
+
+.ghost:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--accent);
+}
+
 .delete-row {
   background: var(--danger);
   padding: 8px 12px;
@@ -322,10 +333,30 @@ tbody tr:hover {
   text-align: right;
 }
 
+.total-meta {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.meta-line {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .total-line {
   font-size: 24px;
   font-weight: 800;
   margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 
