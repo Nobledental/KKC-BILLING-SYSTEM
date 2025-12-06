@@ -427,3 +427,38 @@ tbody tr:hover td {
     padding-top: 200px;
   }
 }
+
+/* ADMIN PANEL TABS */
+.admin-tab-bar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-tab {
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(160,180,220,0.4);
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.25s;
+}
+
+.admin-tab.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(37,99,235,0.3);
+}
+
+.admin-tab:hover {
+  transform: translateY(-2px);
+}
+
+.admin-tab-content {
+  display: none;
+}
+
+.active-admin-tab {
+  display: block;
+}
