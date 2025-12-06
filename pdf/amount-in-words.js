@@ -1,19 +1,21 @@
 /* ============================================================================
-   AMOUNT IN WORDS — Indian Rupees (Professional Grade)
-   Supports:
-   - Crores, Lakhs, Thousands, Hundreds
-   - Decimal paise (optional)
-   - Clean spacing, grammatical correctness
+   AMOUNT IN WORDS — Indian Rupees (Standalone Browser Version)
+   ✔ Works without ES Modules
+   ✔ Used directly by pdf-engine.js
+   ✔ Crores, Lakhs, Thousands, Hundreds
+   ✔ Paise conversion (0–99)
+   ✔ Clean grammar + spacing
 ============================================================================ */
 
-export function inrToWords(num) {
+function inrToWords(num) {
     if (num === 0 || num === "0") return "Zero Rupees Only";
 
-    num = parseFloat(num.toString().replace(/[^0-9.]/g, "")); // clean input
+    // Clean unwanted characters (₹ , commas etc.)
+    num = parseFloat(num.toString().replace(/[^0-9.]/g, ""));
     if (isNaN(num)) return "";
 
-    let fraction = Math.round((num % 1) * 100);
-    let paiseWords = fraction > 0 ? " and " + convertNumber(fraction) + " Paise" : "";
+    const fraction = Math.round((num % 1) * 100);
+    const paiseWords = fraction > 0 ? " and " + convertNumber(fraction) + " Paise" : "";
 
     return convertNumber(Math.floor(num)) + " Rupees" + paiseWords + " Only";
 }
@@ -25,14 +27,17 @@ function convertNumber(num) {
         "Seventeen","Eighteen","Nineteen"
     ];
 
-    const tensWords = ["", "", "Twenty", "Thirty", "Forty",
-        "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    const tensWords = [
+        "", "", "Twenty", "Thirty", "Forty", "Fifty",
+        "Sixty", "Seventy", "Eighty", "Ninety"
     ];
 
-    if (num < 20) return words0_19[num];
+    if (num < 20)
+        return words0_19[num];
 
     if (num < 100)
-        return tensWords[Math.floor(num / 10)] + (num % 10 ? " " + words0_19[num % 10] : "");
+        return tensWords[Math.floor(num / 10)] +
+            (num % 10 ? " " + words0_19[num % 10] : "");
 
     if (num < 1000)
         return words0_19[Math.floor(num / 100)] + " Hundred" +
