@@ -2,122 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Krishna Kidney Centre – Billing Software</title>
+  <title>Krishna Kidney Centre – Offline Billing Software</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- jsPDF (Offline PDF generator) -->
+  <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
 
-  <!-- ==============================================
-       HEADER
-  ================================================== -->
-  <header class="app-header">
-    <div class="logo-box">
-      <img src="kcc-logo.png" class="logo">
+<header class="app-header">
+  <div class="logo-box">
+    <img src="kcc-logo.png" class="logo">
+    <div>
+      <h1>KRISHNA KIDNEY CENTRE</h1>
+      <p class="subhead">Ultra-Advanced Offline Billing System</p>
+    </div>
+  </div>
+
+  <div class="header-buttons">
+    <button id="newBillBtn" class="btn small">New Bill</button>
+    <button id="viewBillsBtn" class="btn small">View Bills</button>
+  </div>
+</header>
+
+
+
+<main class="app-shell">
+
+  <!-- BILL NUMBER -->
+  <section class="card">
+    <h2>Bill Details</h2>
+
+    <div class="grid-2">
       <div>
-        <h1>KRISHNA KIDNEY CENTRE</h1>
-        <p class="subhead">Advanced Billing Software (Offline)</p>
+        <label>Bill No</label>
+        <input id="bill_no" disabled>
+
+        <label>Date</label>
+        <input id="bill_date" type="date">
+
+      </div>
+
+      <div>
+        <label>Time</label>
+        <input id="bill_time" type="time">
+
+        <label>Package Templates</label>
+        <select id="pkgSelect">
+          <option value="">No Package</option>
+          <option value="dj">DJ Stenting Package</option>
+          <option value="surgery">Surgery Package</option>
+        </select>
       </div>
     </div>
-  </header>
-
-
-  <!-- ==============================================
-       MAIN APP WRAPPER
-  ================================================== -->
-  <main class="app-shell">
-
-    <!-- ============================
-         PATIENT DETAILS
-    ============================= -->
-    <section class="card">
-      <h2>Patient Information</h2>
-
-      <div class="grid-2">
-        <div>
-          <label>Patient Name</label>
-          <input id="p_name" type="text">
-
-          <label>Age</label>
-          <input id="p_age" type="number">
-
-          <label>Gender</label>
-          <select id="p_gender">
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-
-          <label>Doctor Name</label>
-          <input id="p_doctor" type="text">
-        </div>
-
-        <div>
-          <label>Date of Admission</label>
-          <input id="p_doa" type="date">
-
-          <label>Date of Discharge</label>
-          <input id="p_dod" type="date">
-
-          <label>Admission Time</label>
-          <input id="p_adm_time" type="time">
-
-          <label>Discharge Time</label>
-          <input id="p_dis_time" type="time">
-        </div>
-      </div>
-    </section>
+  </section>
 
 
 
-    <!-- ============================
-         CHARGES TABLE
-    ============================= -->
-    <section class="card">
-      <div class="table-header">
-        <h2>Charges</h2>
-        <button class="btn" id="addRowBtn">+ Add Item</button>
+  <!-- Patient -->
+  <section class="card">
+    <h2>Patient Information</h2>
+    <div class="grid-2">
+      <div>
+        <label>Patient Name</label>
+        <input id="p_name">
+
+        <label>Age</label>
+        <input id="p_age" type="number">
+
+        <label>Gender</label>
+        <select id="p_gender">
+          <option>Male</option>
+          <option>Female</option>
+        </select>
       </div>
 
-      <table id="chargesTable">
+      <div>
+        <label>Doctor Name</label>
+        <input id="p_doctor">
+
+        <label>Date of Admission</label>
+        <input id="p_doa" type="date">
+
+        <label>Date of Discharge</label>
+        <input id="p_dod" type="date">
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Charges -->
+  <section class="card">
+    <div class="table-header">
+      <h2>Charges</h2>
+      <button class="btn" id="addRowBtn">+ Add Item</button>
+    </div>
+
+    <table id="chargesTable">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Charge</th>
+          <th>Units</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+
+  <!-- Total -->
+  <section class="card total-box">
+    <h2>Total</h2>
+
+    <div class="total-line">
+      <label>Total Amount:</label>
+      <span id="grandTotal">₹0</span>
+    </div>
+
+    <button class="btn primary" id="saveBill">Save Bill</button>
+    <button class="btn primary" id="generateBill">Download PDF</button>
+  </section>
+
+
+  <!-- Previous Bills Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Saved Bills</h2>
+      <table id="billsTable">
         <thead>
           <tr>
-            <th>Description</th>
-            <th>Charge/Unit</th>
-            <th>Units</th>
+            <th>Bill No</th>
+            <th>Name</th>
+            <th>Date</th>
             <th>Total</th>
-            <th></th>
+            <th>Open</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-    </section>
+
+      <button id="closeModal" class="btn" style="margin-top:20px;">Close</button>
+    </div>
+  </div>
 
 
+</main>
 
-    <!-- ============================
-         TOTAL SECTION
-    ============================= -->
-    <section class="card total-box">
-      <h2>Total</h2>
-      <div class="total-line">
-        <label>Total Amount:</label>
-        <span id="grandTotal">₹0</span>
-      </div>
 
-      <button class="btn primary" id="generateBill">Download PDF Bill</button>
-    </section>
-
-  </main>
-
-  <!-- JS -->
-  <script defer src="app.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
