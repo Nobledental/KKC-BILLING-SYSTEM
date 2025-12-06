@@ -461,68 +461,228 @@ function seedDemoData() {
   };
 }
 
-/* ================================================================
-   PREMIUM PDF EXPORT ENGINE
-================================================================ */
-$("exportPDF").addEventListener("click", generatePremiumPDF);
+$("exportPDF").addEventListener("click", exportA4PDF);
 
-function generatePremiumPDF() {
-  const template = document.querySelector("#billTemplate");
+async function exportA4PDF() {
+  const { jsPDF } = window.jspdf;
 
-  // ---------------------- FILL TEMPLATE ----------------------
-
-  // Header will load from settings
-  $("#b_billNo").textContent = $("bill_no").value;
-  $("#b_billDate").textContent = $("bill_date").value;
-  $("#b_patientID").textContent = $("patient_id").value;
-  $("#b_insurance").textContent = $("insurance_mode").value.toUpperCase();
-
-  $("#b_name").textContent = $("p_name").value;
-  $("#b_ageGender").textContent = `${$("p_age").value} / ${$("p_gender").value}`;
-  $("#b_doctor").textContent = $("p_doctor").value;
-
-  $("#b_doa").textContent = $("p_doa").value;
-  $("#b_dod").textContent = $("p_dod").value;
-  $("#b_admTime").textContent = $("p_adm_time").value;
-  $("#b_disTime").textContent = $("p_dis_time").value;
-
-  const totals = calculateTotals();
-  $("#b_grossTotal").textContent = formatINR(totals.total);
-  $("#b_discount").textContent = formatINR(totals.discountAmount);
-  $("#b_finalTotal").textContent = formatINR(totals.finalTotal);
-
-  // Charges
-  const body = $("#b_tableBody");
-  body.innerHTML = "";
-  document.querySelectorAll("#chargesTable tbody tr").forEach((r) => {
-    const tr = document.createElement("tr");
-    const rate = safeNumber(r.querySelector(".rate").value);
-    const qty = safeNumber(r.querySelector(".qty").value);
-
-    tr.innerHTML = `
-      <td>${r.querySelector(".desc").value}</td>
-      <td>${rate}</td>
-      <td>${qty}</td>
-      <td>${rate * qty}</td>
-    `;
-    body.appendChild(tr);
+  const doc = new jsPDF({
+    unit: "pt",
+    format: "a4",
+    orientation: "portrait"
   });
 
-  // Load hospital logo if saved
-  const tx = DB.transaction("settings", "readonly");
-  tx.objectStore("settings").get("hospital").onsuccess = (e) => {
-    const s = e.target.result;
-    if (s?.logo) $("#bill_hospital_logo").src = s.logo;
+  const startX = 40;
+  let y = 40;
 
-    // ---------------------- EXPORT PDF ----------------------
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: $("bill_no").value + ".pdf",
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" }
-      })
-      .from(template)
-      .save();
-  };
+  /* ============================================================
+     1. LOAD SETTINGS
+  ============================================================ */
+  let s;
+  await new Promise((resolve) => {
+    const tx = DB.transaction("settings", "readonly");
+    tx.objectStore("settings").get("hospital").onsuccess = (e) => {
+      s = e.target.result;
+      resolve();
+    };
+  });
+
+  /* ============================================================
+     2. WATERMARK (PAID / UNPAID) — Light diagonal
+  ============================================================ */
+  const watermark = $("insurance_mode").value === "yes" ? "UNPAID" : "PAID";
+
+  doc.saveGraphicsState();
+  doc.setFontSize(90);
+  doc.setTextColor(230, 230, 230);
+  doc.setFont("Helvetica", "bold");
+  doc.text(watermark, 120, 420, {
+    angle: 35,
+    opacity: 0.12
+  });
+  doc.restoreGraphicsState();
+
+  /* ============================================================
+     3. LOGO
+  ============================================================ */
+  if (s?.logo) {
+    doc.addImage(s.logo, "PNG", startX, y, 120, 120);
+  }
+
+  /* ============================================================
+     4. HOSPITAL DETAILS
+  ============================================================ */
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(0, 62, 138);
+  doc.text(s?.name || "Krishna Kidney Centre", startX + 150, y + 30);
+
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+
+  doc.text(s?.address || "", startX + 150, y + 50);
+  doc.text("Phone: " + (s?.phone || ""), startX + 150, y + 65);
+  doc.text("Email: " + (s?.email || ""), startX + 150, y + 80);
+
+  y += 140;
+
+  /* ============================================================
+     5. GRADIENT-LINE (Blue)
+  ============================================================ */
+  doc.setFillColor(0, 62, 138);
+  doc.rect(startX, y, 515, 4, "F");
+  y += 30;
+
+  /* ============================================================
+     6. BILL INFO (H3)
+  ============================================================ */
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(14);
+
+  const billInfo = [
+    ["Bill No", $("bill_no").value],
+    ["Date", $("bill_date").value],
+    ["Patient ID", $("patient_id").value],
+    ["Insurance", $("insurance_mode").value.toUpperCase()],
+  ];
+
+  billInfo.forEach((line) => {
+    doc.setTextColor(27, 167, 165);
+    doc.text(line[0], startX, y);
+    doc.setTextColor(0, 0, 0);
+    doc.text(String(line[1]), startX + 150, y);
+    y += 22;
+  });
+
+  y += 12;
+  doc.setFillColor(210, 240, 245);
+  doc.rect(startX, y, 515, 1, "F");
+  y += 25;
+
+  /* ============================================================
+     7. PATIENT INFO (H3)
+  ============================================================ */
+  const patientInfo = [
+    ["Name", $("p_name").value],
+    ["Age / Gender", `${$("p_age").value} / ${$("p_gender").value}`],
+    ["Doctor", $("p_doctor").value],
+    ["DOA", $("p_doa").value],
+    ["DOD", $("p_dod").value],
+    ["Admission Time", $("p_adm_time").value],
+    ["Discharge Time", $("p_dis_time").value],
+  ];
+
+  patientInfo.forEach((line) => {
+    doc.setTextColor(27, 167, 165);
+    doc.text(line[0], startX, y);
+    doc.setTextColor(0, 0, 0);
+    doc.text(String(line[1]), startX + 150, y);
+    y += 22;
+  });
+
+  y += 20;
+
+  /* ============================================================
+     8. CHARGES TABLE — T3
+  ============================================================ */
+
+  const charges = [];
+  document.querySelectorAll("#chargesTable tbody tr").forEach((r) => {
+    const desc = r.querySelector(".desc").value;
+    const rate = safeNumber(r.querySelector(".rate").value);
+    const qty = safeNumber(r.querySelector(".qty").value);
+    const amt = rate * qty;
+
+    charges.push([
+      desc,
+      formatINR(rate),
+      qty,
+      formatINR(amt),
+      "9985" // default HSN Code (medical services)
+    ]);
+  });
+
+  doc.autoTable({
+    startY: y,
+    head: [["Description", "Rate (₹)", "Qty", "Amount (₹)", "HSN"]],
+    body: charges,
+    theme: "grid",
+    headStyles: {
+      fillColor: [238, 246, 255],
+      textColor: [0, 62, 138],
+      lineWidth: 0.5,
+      lineColor: [212, 231, 255]
+    },
+    styles: {
+      cellPadding: 8,
+      fontSize: 11
+    },
+    columnStyles: {
+      0: { cellWidth: 200 },
+      1: { cellWidth: 80 },
+      2: { cellWidth: 50 },
+      3: { cellWidth: 80 },
+      4: { cellWidth: 60 }
+    }
+  });
+
+  y = doc.lastAutoTable.finalY + 30;
+
+  /* ============================================================
+     9. TOTALS — TOT1/TOT3
+  ============================================================ */
+  const totals = calculateTotals();
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(0, 62, 138);
+
+  doc.text("Gross Total", startX, y);
+  doc.text(formatINR(totals.total), startX + 400, y);
+
+  y += 25;
+
+  doc.text("Discount", startX, y);
+  doc.text(formatINR(totals.discountAmount), startX + 400, y);
+
+  y += 35;
+
+  doc.setFillColor(230, 250, 248);
+  doc.rect(startX, y - 20, 515, 40, "F");
+
+  doc.setFont("Helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("TOTAL PAYABLE", startX + 10, y + 5);
+  doc.text(formatINR(totals.finalTotal), startX + 380, y + 5);
+
+  /** PAGE FOOTER */
+  doc.setFontSize(11);
+  doc.setTextColor(120);
+
+  // Page number
+  doc.text("Page 1 of 1", startX, 820);
+
+  // Powered by footer
+  doc.setTextColor(0, 62, 138);
+  doc.text("Powered by HealthFlo OS — AI Billing Engine", startX + 300, 820);
+
+  /* ============================================================
+     10. SIGNATURE BLOCK
+  ============================================================ */
+  y += 80;
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(13);
+
+  doc.text("__________________________", startX, y);
+  doc.text("Authorized Signature", startX, y + 15);
+
+  doc.text("__________________________", startX + 300, y);
+  doc.text("Patient Signature", startX + 300, y + 15);
+
+  /* ============================================================
+     11. SAVE FILE
+  ============================================================ */
+  doc.save($("bill_no").value + ".pdf");
 }
