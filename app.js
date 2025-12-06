@@ -412,4 +412,20 @@ function loadSettings() {
 ============================================================================ */
 $("exportPDF").onclick = () => exportPremiumPDF();
 
-/* NEXT MESSAGE → I will deliver FULL premium pdf-engine.js */
+/* ================================================================
+   ADMIN PANEL — TAB SWITCHER
+================================================================ */
+document.querySelectorAll(".admin-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+
+    document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    document.querySelectorAll(".admin-tab-content")
+      .forEach(box => box.classList.remove("active-admin-tab"));
+
+    document.getElementById(tab.dataset.adminTarget)
+      .classList.add("active-admin-tab");
+  });
+});
+
