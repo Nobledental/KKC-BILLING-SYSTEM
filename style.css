@@ -25,6 +25,25 @@
 }
 
 /* ============================================================================
+   FONT FIXES — TAMIL + PDF SAFE
+   (Invisible enhancement — UI remains exactly same)
+============================================================================ */
+
+@font-face {
+  font-family: "Manrope";
+  src: local("Manrope"), url("assets/fonts/Manrope-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "TamilSupport";
+  src: url("https://fonts.gstatic.com/s/katibeh/v12/ZGjXol5mq4-Q_CWv.woff2") format("woff2");
+}
+
+.tamil-text {
+  font-family: "TamilSupport", "Manrope", sans-serif;
+}
+
+/* ============================================================================
    GLOBAL RESET
 ============================================================================ */
 
