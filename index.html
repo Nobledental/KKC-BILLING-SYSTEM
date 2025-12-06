@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="ceramic">
 <head>
   <meta charset="UTF-8">
-  <title>Krishna Kidney Centre – Offline Billing Software</title>
+  <title>Krishna Kidney Centre — Billing OS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- STYLES -->
   <link rel="stylesheet" href="style.css">
 
   <!-- jsPDF -->
@@ -14,66 +15,117 @@
 
 <body>
 
-<header class="app-header">
-  <div class="logo-box">
-    <img src="kcc-logo.png" class="logo">
-    <div>
-      <h1>KRISHNA KIDNEY CENTRE</h1>
-      <p class="subhead">Ultra-Advanced Offline Billing System</p>
+<!-- ============================================================
+     LEFT SIDEBAR — VisionOS Glass
+============================================================ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <img src="kcc-logo.png" class="sidebar-logo">
+    <h2>Krishna Kidney Centre</h2>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-target="dashboardPage">🏥 Dashboard</button>
+    <button class="nav-btn" data-target="newBillPage">🧾 New Bill</button>
+    <button class="nav-btn" data-target="tariffPage">📋 Tariff Master</button>
+    <button class="nav-btn" data-target="billsPage">📁 Bills History</button>
+    <button class="nav-btn" data-target="settingsPage">⚙️ Settings</button>
+  </nav>
+</aside>
+
+
+<!-- ============================================================
+     MAIN WRAPPER
+============================================================ -->
+<main class="main-shell">
+
+
+<!-- ============================================================
+     PAGE 1 — DASHBOARD
+============================================================ -->
+<section id="dashboardPage" class="page active-page floating-panel">
+  <h1>Dashboard</h1>
+
+  <div class="dashboard-grid">
+    <div class="dash-card">
+      <h3>New Bill</h3>
+      <button class="btn primary" onclick="openPage('newBillPage')">Create Bill →</button>
+    </div>
+
+    <div class="dash-card">
+      <h3>Saved Bills</h3>
+      <button class="btn" onclick="openPage('billsPage')">View Bills →</button>
+    </div>
+
+    <div class="dash-card">
+      <h3>Tariff Master</h3>
+      <button class="btn" onclick="openPage('tariffPage')">Manage Tariffs →</button>
+    </div>
+
+    <div class="dash-card">
+      <h3>Hospital Settings</h3>
+      <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
   </div>
-
-  <div class="header-buttons">
-    <button id="newBillBtn" class="btn small">New Bill</button>
-    <button id="viewBillsBtn" class="btn small">View Bills</button>
-  </div>
-</header>
+</section>
 
 
 
-<main class="app-shell">
 
-  <!-- BILL NUMBER -->
-  <section class="card">
-    <h2>Bill Details</h2>
 
-    <div class="grid-2">
+
+<!-- ============================================================
+     PAGE 2 — NEW BILL (Floating VisionOS Panel)
+============================================================ -->
+<section id="newBillPage" class="page floating-panel">
+  <h1>New Bill</h1>
+
+  <!-- BILL INFO -->
+  <div class="card">
+    <h2>Bill Information</h2>
+
+    <div class="grid-3">
       <div>
         <label>Bill No</label>
         <input id="bill_no" disabled>
+      </div>
 
+      <div>
         <label>Date</label>
         <input id="bill_date" type="date">
-
       </div>
 
       <div>
         <label>Time</label>
         <input id="bill_time" type="time">
-
-        <label>Package Templates</label>
-        <select id="pkgSelect">
-          <option value="">No Package</option>
-          <option value="dj">DJ Stenting Package</option>
-          <option value="surgery">Surgery Package</option>
-        </select>
       </div>
     </div>
-  </section>
+  </div>
 
 
 
-  <!-- Patient -->
-  <section class="card">
+
+  <!-- PATIENT INFO -->
+  <div class="card">
     <h2>Patient Information</h2>
-    <div class="grid-2">
+
+    <div class="grid-3">
+      <div>
+        <label>Patient ID (Auto)</label>
+        <input id="patient_id" disabled>
+      </div>
+
       <div>
         <label>Patient Name</label>
         <input id="p_name">
+      </div>
 
+      <div>
         <label>Age</label>
         <input id="p_age" type="number">
+      </div>
 
+      <div>
         <label>Gender</label>
         <select id="p_gender">
           <option>Male</option>
@@ -84,79 +136,230 @@
       <div>
         <label>Doctor Name</label>
         <input id="p_doctor">
+      </div>
+    </div>
 
+    <div class="grid-2" style="margin-top:20px;">
+      <div>
         <label>Date of Admission</label>
         <input id="p_doa" type="date">
+      </div>
 
+      <div>
         <label>Date of Discharge</label>
         <input id="p_dod" type="date">
       </div>
     </div>
-  </section>
+
+    <div class="grid-2" style="margin-top:20px;">
+      <div>
+        <label>Admission Time</label>
+        <input id="p_adm_time" type="time">
+      </div>
+
+      <div>
+        <label>Discharge Time</label>
+        <input id="p_dis_time" type="time">
+      </div>
+    </div>
+  </div>
 
 
 
-  <!-- Charges -->
-  <section class="card">
+
+  <!-- CHARGES TABLE -->
+  <div class="card">
     <div class="table-header">
       <h2>Charges</h2>
-      <button class="btn" id="addRowBtn">+ Add Item</button>
+
+      <div style="display:flex; gap:10px;">
+        <select id="procedureSelect">
+          <option value="">Select Procedure (Tariff)</option>
+        </select>
+
+        <button id="addRowBtn" class="btn">+ Add Item</button>
+      </div>
     </div>
 
     <table id="chargesTable">
       <thead>
         <tr>
           <th>Description</th>
-          <th>Charge</th>
-          <th>Units</th>
+          <th>Rate</th>
+          <th>Qty</th>
           <th>Total</th>
           <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
+  </div>
 
 
-  <!-- Total -->
-  <section class="card total-box">
-    <h2>Total</h2>
 
+
+  <!-- DISCOUNT BLOCK -->
+  <div class="card">
+    <h2>Discount</h2>
+
+    <div class="grid-3">
+      <div>
+        <label>Discount (%)</label>
+        <input id="discount_percent" type="number" value="0">
+      </div>
+
+      <div>
+        <label>Discount (₹)</label>
+        <input id="discount_amount" type="number" value="0">
+      </div>
+
+      <div>
+        <label>Insurance Mode</label>
+        <select id="insurance_mode">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- TOTAL + ACTIONS -->
+  <div class="card total-box">
     <div class="total-line">
       <label>Total Amount:</label>
       <span id="grandTotal">₹0</span>
     </div>
 
-    <button class="btn primary" id="saveBill">Save Bill</button>
-    <button class="btn primary" id="generateBill">Download PDF</button>
-  </section>
-
-
-  <!-- Previous Bills Modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-box">
-      <h2>Saved Bills</h2>
-      <table id="billsTable">
-        <thead>
-          <tr>
-            <th>Bill No</th>
-            <th>Name</th>
-            <th>Date</th>
-            <th>Total</th>
-            <th>Open</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <button id="closeModal" class="btn" style="margin-top:20px;">Close</button>
+    <div class="action-buttons">
+      <button id="saveBill" class="btn primary">Save Bill</button>
+      <button id="exportPDF" class="btn">Export as PDF</button>
     </div>
   </div>
+
+</section>
+
+
+
+
+
+
+<!-- ============================================================
+     PAGE 3 — TARIFF MASTER
+============================================================ -->
+<section id="tariffPage" class="page floating-panel">
+  <h1>Tariff Master</h1>
+
+  <div class="card">
+    <h2>Add / Edit Tariff Item</h2>
+
+    <div class="grid-3">
+      <div>
+        <label>Procedure Name</label>
+        <input id="tariff_name">
+      </div>
+
+      <div>
+        <label>Default Rate (₹)</label>
+        <input id="tariff_rate" type="number">
+      </div>
+
+      <div>
+        <button id="saveTariff" class="btn primary" style="margin-top:30px;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Tariff List</h2>
+
+    <table id="tariffTable">
+      <thead>
+        <tr>
+          <th>Procedure</th>
+          <th>Rate</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+
+
+
+
+
+<!-- ============================================================
+     PAGE 4 — BILLS HISTORY
+============================================================ -->
+<section id="billsPage" class="page floating-panel">
+  <h1>Bills History</h1>
+
+  <div class="card">
+    <table id="billsTable">
+      <thead>
+        <tr>
+          <th>Bill No</th>
+          <th>Patient ID</th>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+
+
+
+
+
+<!-- ============================================================
+     PAGE 5 — SETTINGS
+============================================================ -->
+<section id="settingsPage" class="page floating-panel">
+  <h1>Hospital Settings</h1>
+
+  <div class="card">
+    <h2>Hospital Details</h2>
+
+    <label>Hospital Name</label>
+    <input id="set_h_name">
+
+    <label>Address</label>
+    <textarea id="set_h_address" rows="3"></textarea>
+
+    <label>Phone</label>
+    <input id="set_h_phone">
+
+    <label>Email</label>
+    <input id="set_h_email">
+
+    <label>GST Number</label>
+    <input id="set_h_gst">
+
+    <label>Upload Hospital Logo</label>
+    <input id="set_h_logo" type="file">
+
+    <button id="saveSettings" class="btn primary" style="margin-top:20px;">Save Settings</button>
+  </div>
+</section>
 
 
 </main>
 
 
+
+<!-- ============================================================
+     JS ENGINE
+============================================================ -->
 <script src="app.js"></script>
 
 </body>
