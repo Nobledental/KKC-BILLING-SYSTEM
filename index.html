@@ -12,16 +12,16 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="pdf/preview.css" />
 
-  <!-- VENDOR SCRIPTS (LOCAL OFFLINE) -->
+  <!-- VENDOR SCRIPTS (CORRECT ORDER) -->
+  <script src="vendor/html2canvas.min.js"></script>
   <script src="vendor/jspdf.umd.min.js"></script>
   <script src="vendor/jspdf.autotable.min.js"></script>
-  <script src="vendor/html2canvas.min.js"></script>
 </head>
 
 <body>
 
 <!-- ============================================================
-     SIDEBAR — HF OS Ceramic
+     SIDEBAR
 ============================================================ -->
 <aside class="sidebar">
   <div class="sidebar-header">
@@ -106,10 +106,7 @@
         <label>Gender</label>
         <select id="p_gender"><option>Male</option><option>Female</option></select>
       </div>
-      <div>
-        <label>Doctor Name</label>
-        <input id="p_doctor">
-      </div>
+      <div><label>Doctor Name</label><input id="p_doctor"></div>
     </div>
 
     <div class="grid-2">
@@ -160,7 +157,6 @@
   <!-- TOTAL BOX -->
   <div class="card total-box">
     <div class="total-meta">
-
       <div class="meta-line">
         <span>Sub Total:</span><strong id="subTotal">₹0</strong>
       </div>
@@ -168,7 +164,6 @@
       <div class="meta-line">
         <span>Discount Applied:</span><strong id="discountValue">₹0</strong>
       </div>
-
     </div>
 
     <div class="total-line"><label>Total Amount:</label><span id="grandTotal">₹0</span></div>
@@ -176,8 +171,7 @@
     <div class="action-buttons">
       <button id="loadDemoBill" class="btn ghost">Load Demo</button>
       <button id="saveBill" class="btn primary">Save Bill</button>
-      <button id="previewPDF" class="btn">Preview PDF</button>
-      <button id="previewPDF" class="btn primary" onclick="openBillPreview()">Preview PDF</button>
+      <button id="previewBillBtn" class="btn primary" onclick="openBillPreview()">Preview PDF</button>
     </div>
   </div>
 
@@ -366,29 +360,8 @@
 </main>
 
 <!-- ============================================================
-     BILL PREVIEW MODAL (Hidden initially)
+     UNIFIED BILL PREVIEW MODAL (Only One)
 ============================================================ -->
-<div id="previewModal" style="display:none;">
-  <div class="preview-box">
-      <button class="preview-close-btn"
-        onclick="document.getElementById('previewModal').style.display='none'">
-        Close
-      </button>
-
-      <div id="billPreviewContainer"></div>
-
-      <div class="preview-actions">
-          <button class="preview-btn download" onclick="exportPremiumPDF()">Download PDF</button>
-          <button class="preview-btn print" onclick="window.print()">Print</button>
-      </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     BILL PREVIEW MODAL (Hidden Until Triggered)
-============================================================ -->
-<link rel="stylesheet" href="pdf/preview.css">
-
 <div id="billPreviewModal" class="preview-overlay">
   <div class="preview-container">
     
@@ -410,7 +383,6 @@
 <!-- ============================================================
      JS ENGINE
 ============================================================ -->
-
 <script src="app.js"></script>
 <script src="pdf/amount-in-words.js"></script>
 <script src="pdf/pdf-engine.js"></script>
