@@ -5,11 +5,15 @@
   <title>Krishna Kidney Centre — Billing OS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- STYLES -->
-  <link rel="stylesheet" href="style.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/bill-template.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
 
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- JS LIBRARIES -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -17,11 +21,11 @@
 <body>
 
 <!-- ============================================================
-     LEFT SIDEBAR — VisionOS Glass
+     SIDEBAR — VisionOS Ceramic Glass V3
 ============================================================ -->
 <aside class="sidebar">
   <div class="sidebar-header">
-    <img src="kcc-logo.png" class="sidebar-logo">
+    <img src="assets/img/kcc-logo.png" class="sidebar-logo">
     <h2>Krishna Kidney Centre</h2>
   </div>
 
@@ -30,15 +34,18 @@
     <button class="nav-btn" data-target="newBillPage">🧾 New Bill</button>
     <button class="nav-btn" data-target="tariffPage">📋 Tariff Master</button>
     <button class="nav-btn" data-target="billsPage">📁 Bills History</button>
+    <button class="nav-btn" data-target="adminPage">🛂 Admin Panel</button>
     <button class="nav-btn" data-target="settingsPage">⚙️ Settings</button>
   </nav>
 </aside>
 
 
+
 <!-- ============================================================
-     MAIN WRAPPER
+     MAIN SHELL — FLOATING PANELS
 ============================================================ -->
 <main class="main-shell">
+
 
 
 <!-- ============================================================
@@ -48,25 +55,37 @@
   <h1>Dashboard</h1>
 
   <div class="dashboard-grid">
+
     <div class="dash-card">
-      <h3>New Bill</h3>
-      <button class="btn primary" onclick="openPage('newBillPage')">Create Bill →</button>
+      <h3>Create New Bill</h3>
+      <p>Start a new patient billing entry.</p>
+      <button class="btn primary" onclick="openPage('newBillPage')">Create →</button>
     </div>
 
     <div class="dash-card">
       <h3>Saved Bills</h3>
-      <button class="btn" onclick="openPage('billsPage')">View Bills →</button>
+      <p>View all previously saved bills.</p>
+      <button class="btn" onclick="openPage('billsPage')">Open →</button>
     </div>
 
     <div class="dash-card">
       <h3>Tariff Master</h3>
-      <button class="btn" onclick="openPage('tariffPage')">Manage Tariffs →</button>
+      <p>Manage your procedure tariff list.</p>
+      <button class="btn" onclick="openPage('tariffPage')">Manage →</button>
+    </div>
+
+    <div class="dash-card">
+      <h3>Admin Panel</h3>
+      <p>Manage staff, doctors and departments.</p>
+      <button class="btn" onclick="openPage('adminPage')">Open →</button>
     </div>
 
     <div class="dash-card">
       <h3>Hospital Settings</h3>
+      <p>Configure hospital details & logo.</p>
       <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
+
   </div>
 </section>
 
@@ -74,9 +93,8 @@
 
 
 
-
 <!-- ============================================================
-     PAGE 2 — NEW BILL (Floating VisionOS Panel)
+     PAGE 2 — NEW BILL PAGE
 ============================================================ -->
 <section id="newBillPage" class="page floating-panel">
   <h1>New Bill</h1>
@@ -92,18 +110,16 @@
       </div>
 
       <div>
-        <label>Date</label>
+        <label>Bill Date</label>
         <input id="bill_date" type="date">
       </div>
 
       <div>
-        <label>Time</label>
+        <label>Bill Time</label>
         <input id="bill_time" type="time">
       </div>
     </div>
   </div>
-
-
 
 
   <!-- PATIENT INFO -->
@@ -112,7 +128,7 @@
 
     <div class="grid-3">
       <div>
-        <label>Patient ID (Auto)</label>
+        <label>UHID</label>
         <input id="patient_id" disabled>
       </div>
 
@@ -136,7 +152,12 @@
 
       <div>
         <label>Doctor Name</label>
-        <input id="p_doctor">
+        <select id="p_doctor"></select>
+      </div>
+
+      <div>
+        <label>File Number</label>
+        <input id="p_file_no">
       </div>
     </div>
 
@@ -163,21 +184,21 @@
         <input id="p_dis_time" type="time">
       </div>
     </div>
+
+    <div style="margin-top:20px;">
+       <label>Patient Address</label>
+       <textarea id="p_address" rows="2"></textarea>
+    </div>
   </div>
 
 
-
-
-  <!-- CHARGES TABLE -->
+  <!-- CHARGES -->
   <div class="card">
     <div class="table-header">
       <h2>Charges</h2>
 
       <div style="display:flex; gap:10px;">
-        <select id="procedureSelect">
-          <option value="">Select Procedure (Tariff)</option>
-        </select>
-
+        <select id="procedureSelect"></select>
         <button id="addRowBtn" class="btn">+ Add Item</button>
       </div>
     </div>
@@ -197,11 +218,9 @@
   </div>
 
 
-
-
-  <!-- DISCOUNT BLOCK -->
+  <!-- DISCOUNT + INSURANCE -->
   <div class="card">
-    <h2>Discount</h2>
+    <h2>Discount / Insurance</h2>
 
     <div class="grid-3">
       <div>
@@ -225,35 +244,25 @@
   </div>
 
 
-
-
-  <!-- TOTAL + ACTIONS -->
+  <!-- TOTALS -->
   <div class="card total-box">
     <div class="total-meta">
-      <div class="meta-line">
-        <span>Sub Total:</span>
-        <strong id="subTotal">₹0</strong>
-      </div>
-      <div class="meta-line">
-        <span>Discount Applied:</span>
-        <strong id="discountValue">₹0</strong>
-      </div>
+      <div class="meta-line"><span>Sub Total:</span><strong id="subTotal">₹0</strong></div>
+      <div class="meta-line"><span>Discount:</span><strong id="discountValue">₹0</strong></div>
     </div>
 
     <div class="total-line">
-      <label>Total Amount:</label>
+      <label>Grand Total:</label>
       <span id="grandTotal">₹0</span>
     </div>
 
     <div class="action-buttons">
       <button id="loadDemoBill" class="btn ghost">Load Sample Bill</button>
       <button id="saveBill" class="btn primary">Save Bill</button>
-      <button id="exportPDF" class="btn">Export as PDF</button>
+      <button id="exportPDF" class="btn">Export PDF</button>
     </div>
   </div>
-
 </section>
-
 
 
 
@@ -266,7 +275,7 @@
   <h1>Tariff Master</h1>
 
   <div class="card">
-    <h2>Add / Edit Tariff Item</h2>
+    <h2>Add Procedure</h2>
 
     <div class="grid-3">
       <div>
@@ -275,12 +284,12 @@
       </div>
 
       <div>
-        <label>Default Rate (₹)</label>
+        <label>Rate</label>
         <input id="tariff_rate" type="number">
       </div>
 
       <div>
-        <button id="saveTariff" class="btn primary" style="margin-top:30px;">Save</button>
+        <button id="saveTariff" class="btn primary" style="margin-top:25px;">Save</button>
       </div>
     </div>
   </div>
@@ -292,15 +301,15 @@
       <thead>
         <tr>
           <th>Procedure</th>
-          <th>Rate</th>
+          <th>Rate (₹)</th>
           <th></th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
-</section>
 
+</section>
 
 
 
@@ -318,7 +327,7 @@
         <tr>
           <th>Bill No</th>
           <th>Patient ID</th>
-          <th>Name</th>
+          <th>Patient Name</th>
           <th>Date</th>
           <th>Total</th>
           <th></th>
@@ -333,15 +342,68 @@
 
 
 
+<!-- ============================================================
+     PAGE 5 — ADMIN PANEL
+============================================================ -->
+<section id="adminPage" class="page floating-panel">
+  <h1>Admin Panel</h1>
+
+  <div class="admin-grid">
+
+    <!-- STAFF -->
+    <div class="admin-card">
+      <h2>Manage Staff</h2>
+
+      <div class="grid-2">
+        <input id="staff_name" placeholder="Staff Name">
+        <input id="staff_role" placeholder="Role">
+      </div>
+
+      <div class="grid-2" style="margin-top:10px;">
+        <input id="staff_phone" placeholder="Phone">
+        <button class="btn primary" onclick="addStaff()">Add Staff</button>
+      </div>
+
+      <table class="admin-table" id="staffTable">
+        <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- DOCTORS -->
+    <div class="admin-card">
+      <h2>Manage Doctors</h2>
+
+      <div class="grid-2">
+        <input id="doc_name" placeholder="Doctor Name">
+        <input id="doc_spec" placeholder="Specialization">
+      </div>
+
+      <div class="grid-2" style="margin-top:10px;">
+        <input id="doc_phone" placeholder="Phone">
+        <button class="btn primary" onclick="addDoctor()">Add Doctor</button>
+      </div>
+
+      <table class="admin-table" id="doctorTable">
+        <thead><tr><th>Name</th><th>Spec</th><th>Phone</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+
+
+
 
 <!-- ============================================================
-     PAGE 5 — SETTINGS
+     PAGE 6 — SETTINGS
 ============================================================ -->
 <section id="settingsPage" class="page floating-panel">
   <h1>Hospital Settings</h1>
 
   <div class="card">
-    <h2>Hospital Details</h2>
 
     <label>Hospital Name</label>
     <input id="set_h_name">
@@ -366,138 +428,26 @@
 </section>
 
 
-</main>
+
+
 
 <!-- ============================================================
-     PREMIUM BILL TEMPLATE (Hidden — Used Only for PDF Export)
-     Krishna Kidney Centre — Premium Medical Invoice
-     H3 + T3 + TOT1/TOT3 Hybrid
+     HIDDEN PREMIUM PDF & RECEIPT TEMPLATES
 ============================================================ -->
-<div id="billTemplate" style="display:none;">
-
-  <div class="bill-wrapper">
-
-    <!-- HEADER -->
-    <div class="bill-header">
-      <div class="bill-header-left">
-        <img id="bill_hospital_logo" src="" alt="Hospital Logo" class="bill-logo-large">
-      </div>
-
-      <div class="bill-header-right">
-        <h1 class="bill-hospital-name">Krishna Kidney Centre</h1>
-        <p class="bill-hospital-details">
-          No. 1/375-7, Rayakottai Main Road, Krishnagiri – 635001<br>
-          Phone: 8300224569 / 9442318169<br>
-          Email: bksrinivasan1980@yahoo.co.in
-        </p>
-      </div>
-    </div>
-
-    <!-- GRADIENT LINE -->
-    <div class="bill-header-gradient"></div>
-
-    <!-- BILL INFO -->
-    <div class="bill-meta-grid">
-      <div>
-        <h3>Bill No</h3>
-        <p id="b_billNo"></p>
-      </div>
-      <div>
-        <h3>Date</h3>
-        <p id="b_billDate"></p>
-      </div>
-      <div>
-        <h3>Patient ID</h3>
-        <p id="b_patientID"></p>
-      </div>
-      <div>
-        <h3>Insurance</h3>
-        <p id="b_insurance"></p>
-      </div>
-    </div>
-
-    <!-- PATIENT DETAILS -->
-    <div class="bill-section">
-      <h2>Patient Information</h2>
-
-      <div class="bill-meta-grid">
-        <div>
-          <h3>Name</h3>
-          <p id="b_name"></p>
-        </div>
-        <div>
-          <h3>Age / Gender</h3>
-          <p id="b_ageGender"></p>
-        </div>
-        <div>
-          <h3>Doctor</h3>
-          <p id="b_doctor"></p>
-        </div>
-      </div>
-
-      <div class="bill-meta-grid">
-        <div>
-          <h3>DOA</h3>
-          <p id="b_doa"></p>
-        </div>
-        <div>
-          <h3>DOD</h3>
-          <p id="b_dod"></p>
-        </div>
-        <div>
-          <h3>Admission Time</h3>
-          <p id="b_admTime"></p>
-        </div>
-        <div>
-          <h3>Discharge Time</h3>
-          <p id="b_disTime"></p>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHARGES TABLE -->
-    <div class="bill-section">
-      <h2>Charges</h2>
-
-      <table class="bill-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Rate (₹)</th>
-            <th>Qty</th>
-            <th>Amount (₹)</th>
-          </tr>
-        </thead>
-        <tbody id="b_tableBody"></tbody>
-      </table>
-    </div>
-
-    <!-- TOTALS -->
-    <div class="bill-total-box">
-      <div class="bill-total-line bill-total-border">
-        <span>Gross Total</span>
-        <strong id="b_grossTotal"></strong>
-      </div>
-
-      <div class="bill-total-line bill-total-border">
-        <span>Discount</span>
-        <strong id="b_discount"></strong>
-      </div>
-
-      <div class="bill-final">
-        <span>Total Payable</span>
-        <strong id="b_finalTotal"></strong>
-      </div>
-    </div>
-
-  </div>
+<div id="pdfTemplates" style="display:none;">
+  <?php include "templates/bill-template.html"; ?>
+  <?php include "templates/receipt-template.html"; ?>
 </div>
+
 
 
 <!-- ============================================================
      JS ENGINE
 ============================================================ -->
-<script src="app.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/admin.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/pdf-engine.js"></script>
 
 </body>
 </html>
