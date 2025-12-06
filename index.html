@@ -5,10 +5,10 @@
   <title>Krishna Kidney Centre — Billing OS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSS -->
+  <!-- STYLES -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- jsPDF + AutoTable -->
+  <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -16,11 +16,11 @@
 <body>
 
 <!-- ============================================================
-     SIDEBAR — VisionOS Ceramic Glass
+     LEFT SIDEBAR — VisionOS Glass
 ============================================================ -->
 <aside class="sidebar">
   <div class="sidebar-header">
-    <img src="assets/logo.png" class="sidebar-logo">
+    <img src="kcc-logo.png" class="sidebar-logo">
     <h2>Krishna Kidney Centre</h2>
   </div>
 
@@ -35,10 +35,9 @@
 
 
 <!-- ============================================================
-     MAIN WRAPPER (OS Shell)
+     MAIN WRAPPER
 ============================================================ -->
 <main class="main-shell">
-
 
 
 <!-- ============================================================
@@ -64,7 +63,7 @@
     </div>
 
     <div class="dash-card">
-      <h3>Settings</h3>
+      <h3>Hospital Settings</h3>
       <button class="btn" onclick="openPage('settingsPage')">Configure →</button>
     </div>
   </div>
@@ -74,8 +73,9 @@
 
 
 
+
 <!-- ============================================================
-     PAGE 2 — NEW BILL
+     PAGE 2 — NEW BILL (Floating VisionOS Panel)
 ============================================================ -->
 <section id="newBillPage" class="page floating-panel">
   <h1>New Bill</h1>
@@ -103,13 +103,15 @@
   </div>
 
 
+
+
   <!-- PATIENT INFO -->
   <div class="card">
     <h2>Patient Information</h2>
 
     <div class="grid-3">
       <div>
-        <label>Patient ID</label>
+        <label>Patient ID (Auto)</label>
         <input id="patient_id" disabled>
       </div>
 
@@ -164,6 +166,7 @@
 
 
 
+
   <!-- CHARGES TABLE -->
   <div class="card">
     <div class="table-header">
@@ -194,9 +197,10 @@
 
 
 
-  <!-- DISCOUNT -->
+
+  <!-- DISCOUNT BLOCK -->
   <div class="card">
-    <h2>Discount / Insurance</h2>
+    <h2>Discount</h2>
 
     <div class="grid-3">
       <div>
@@ -221,6 +225,7 @@
 
 
 
+
   <!-- TOTAL + ACTIONS -->
   <div class="card total-box">
     <div class="total-line">
@@ -230,11 +235,12 @@
 
     <div class="action-buttons">
       <button id="saveBill" class="btn primary">Save Bill</button>
-      <button id="exportPDF" class="btn">Export PDF</button>
+      <button id="exportPDF" class="btn">Export as PDF</button>
     </div>
   </div>
 
 </section>
+
 
 
 
@@ -286,6 +292,7 @@
 
 
 
+
 <!-- ============================================================
      PAGE 4 — BILLS HISTORY
 ============================================================ -->
@@ -308,6 +315,7 @@
     </table>
   </div>
 </section>
+
 
 
 
@@ -346,6 +354,7 @@
 
 
 </main>
+
 
 
 <!-- ============================================================
