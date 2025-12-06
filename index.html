@@ -463,9 +463,17 @@
 <!-- ============================================================
      JS ENGINE
 ============================================================ -->
+<!-- APP LOGIC (normal script) -->
 <script src="app.js"></script>
-<script src="pdf/amount-in-words.js"></script>
-<script src="pdf/pdf-engine.js"></script>
+
+<!-- PDF MODULES (must be loaded as ES6 modules) -->
+<script type="module">
+  import './pdf/amount-in-words.js';
+  import { exportPremiumPDF } from './pdf/pdf-engine.js';
+
+  // Connect button event after module load
+  document.getElementById("exportPDF").onclick = exportPremiumPDF;
+</script>
 
 </body>
 </html>
