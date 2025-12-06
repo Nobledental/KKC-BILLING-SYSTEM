@@ -1,10 +1,28 @@
 /* ===========================================================================
-   KRISHNA KIDNEY CENTRE — ULTRA PREMIUM CERAMIC WHITE OS THEME
-   Inspired by Apple Health, hospital EMR UI, and futuristic medical OS
+   CERAMIC V2 — VisionOS Medical Billing UI
+   Krishna Kidney Centre — Billing Operating System
+   Premium floating UI, glass panels, sidebar OS shell
    ===========================================================================
 */
 
-/* ------------------ RESET ------------------ */
+/* ---------------------- ROOT ---------------------- */
+:root {
+  --ceramic-bg: #eef2f7;
+  --panel-bg: rgba(255, 255, 255, 0.78);
+  --panel-border: rgba(200, 220, 255, 0.45);
+  --panel-shadow: 0 25px 60px rgba(0,0,0,0.08);
+  --text-dark: #0b1a33;
+  --text-muted: #556781;
+  --accent: #2563eb;
+  --danger: #ff4f5e;
+
+  --radius: 22px;
+  --radius-sm: 16px;
+
+  --sidebar-width: 260px;
+}
+
+/* ---------------------- GLOBAL RESET ---------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -13,310 +31,358 @@
 }
 
 body {
-  background: #f5f7fb;
-  color: #0f1c3b;
-  padding-bottom: 80px;
+  background: var(--ceramic-bg);
+  height: 100vh;
+  overflow-x: hidden;
+  color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
-  font-smooth: always;
 }
 
 
-/* ------------------ HEADER ------------------ */
-.app-header {
-  height: 90px;
-  padding: 0 40px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(90, 110, 150, 0.12);
-  position: sticky;
+
+/* ===========================================================================
+   SIDEBAR (VisionOS Glass)
+=========================================================================== */
+
+.sidebar {
+  position: fixed;
   top: 0;
-  z-index: 50;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-right: 1px solid rgba(190, 210, 255, 0.35);
+  box-shadow: 6px 0 20px rgba(0,0,0,0.05);
+
+  padding: 25px;
+  z-index: 10;
 }
 
-.logo-box {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+.sidebar-header {
+  text-align: center;
 }
 
-.logo {
-  height: 68px;
-  width: 68px;
+.sidebar-logo {
+  width: 80px;
+  height: 80px;
   object-fit: contain;
+  margin-bottom: 10px;
 }
 
-.app-header h1 {
-  font-size: 26px;
+.sidebar h2 {
+  font-size: 18px;
   font-weight: 800;
-  color: #0b1a33;
+  color: var(--text-dark);
 }
 
-.subhead {
-  font-size: 13px;
-  color: #587;
-  margin-top: 3px;
-}
 
-.header-buttons {
+
+/* ---------------------- NAV BUTTONS ---------------------- */
+.sidebar-nav {
+  margin-top: 30px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
+.nav-btn {
+  width: 100%;
+  padding: 12px 18px;
+  text-align: left;
 
-/* ------------------ GLOBAL LAYOUT ------------------ */
-.app-shell {
-  width: 92%;
-  max-width: 1350px;
-  margin: 34px auto;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(160, 180, 220, 0.25);
+  border-radius: var(--radius-sm);
+
+  color: var(--text-dark);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+
+  transition: 0.25s;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.8);
+  transform: translateX(3px);
+}
+
+.nav-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
 }
 
 
-/* ------------------ PREMIUM CARD ------------------ */
+
+/* ===========================================================================
+   MAIN SHELL
+=========================================================================== */
+
+.main-shell {
+  margin-left: var(--sidebar-width);
+  padding: 40px;
+}
+
+
+
+/* ===========================================================================
+   FLOATING PANELS (VisionOS style)
+=========================================================================== */
+
+.floating-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(22px) saturate(180%);
+  padding: 34px;
+  border-radius: var(--radius);
+  box-shadow: var(--panel-shadow);
+  border: 1px solid var(--panel-border);
+
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ---------------------- PAGE TOGGLE ---------------------- */
+.page {
+  display: none;
+}
+
+.active-page {
+  display: block;
+}
+
+
+
+/* ===========================================================================
+   HEADINGS
+=========================================================================== */
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 25px;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+
+
+/* ===========================================================================
+   CARDS
+=========================================================================== */
+
 .card {
-  background: linear-gradient(to bottom right,
-    rgba(255, 255, 255, 0.92),
-    rgba(255, 255, 255, 0.78)
-  );
-  border-radius: 22px;
-  padding: 32px;
-  margin-top: 32px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  padding: 28px;
+  margin-top: 28px;
+  border-radius: var(--radius-sm);
 
-  border: 1px solid rgba(110, 140, 180, 0.12);
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.04),
-    0 4px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.06);
+  border: 1px solid rgba(180, 200, 240, 0.4);
 
-  transition: 0.25s ease;
+  transition: 0.25s;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.08),
-    0 6px 14px rgba(0, 0, 0, 0.06);
-}
-
-.card h2 {
-  font-size: 21px;
-  font-weight: 700;
-  margin-bottom: 18px;
-  color: #0a1635;
+  transform: translateY(-3px);
 }
 
 
-/* ------------------ INPUTS & FORMS ------------------ */
-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #294;
-  display: block;
-  margin-bottom: 6px;
-  margin-top: 12px;
-}
 
-input, select {
-  width: 100%;
-  padding: 14px;
-  font-size: 15px;
+/* ===========================================================================
+   GRID LAYOUTS
+=========================================================================== */
 
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(100, 120, 180, 0.20);
-  border-radius: 12px;
-
-  transition: 0.25s;
-  outline: none;
-}
-
-input:focus, select:focus {
-  border-color: #2e5fff;
-  box-shadow: 0 0 0 4px rgba(50, 110, 255, 0.22);
-}
-
-
-/* ------------------ GRID ------------------ */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: 22px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 22px;
 }
 
 
-/* ------------------ TABLE ------------------ */
-.table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
-#chargesTable {
+/* ===========================================================================
+   INPUTS / SELECTS
+=========================================================================== */
+
+input, select, textarea {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-#chargesTable thead {
-  background: linear-gradient(90deg, #234 0%, #345 100%);
-  color: #fff;
-}
-
-#chargesTable th {
-  padding: 16px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
-#chargesTable td {
   padding: 14px;
-  border-bottom: 1px solid rgba(100, 100, 150, 0.12);
-  background: rgba(255, 255, 255, 0.3);
-}
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.9);
 
-#chargesTable tbody tr:hover {
-  background: rgba(150, 170, 255, 0.08);
+  border: 1px solid rgba(150, 170, 210, 0.35);
+  font-size: 15px;
   transition: 0.25s;
 }
 
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
 
-/* ------------------ BUTTONS ------------------ */
+
+
+/* ===========================================================================
+   TABLES
+=========================================================================== */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 16px;
+  font-size: 14px;
+  background: rgba(30, 58, 138, 0.85);
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+td {
+  padding: 14px;
+  background: rgba(255,255,255,0.5);
+  border-bottom: 1px solid rgba(150,170,210,0.2);
+}
+
+tbody tr:hover {
+  background: rgba(200, 215, 255, 0.28);
+}
+
+
+
+/* ===========================================================================
+   BUTTONS
+=========================================================================== */
+
 .btn {
-  background: #0f1c3b;
-  color: white;
-  padding: 12px 20px;
+  padding: 12px 18px;
+  background: #1e293b;
+  color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.3px;
-  transition: all 0.25s;
+  transition: 0.25s;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
   opacity: 0.9;
-}
-
-.btn.small {
-  padding: 10px 16px;
-  font-size: 13px;
+  transform: translateY(-2px);
 }
 
 .primary {
-  background: #2563eb;
-  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+  background: var(--accent);
+  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
 }
 
 .primary:hover {
   background: #1d4ed8;
 }
 
-
-/* ------------------ DELETE BUTTON ------------------ */
 .delete-row {
-  background: #ff5360;
-  color: #fff;
-  border: none;
+  background: var(--danger);
   padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.25s;
+  border-radius: 8px;
 }
 
 .delete-row:hover {
-  background: #e0313f;
+  background: #d93646;
 }
 
 
-/* ------------------ TOTAL BOX ------------------ */
+
+/* ===========================================================================
+   TOTALS
+=========================================================================== */
+
 .total-box {
   text-align: right;
 }
 
 .total-line {
-  margin: 10px 0 22px 0;
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 800;
+  margin-bottom: 20px;
 }
 
 
-/* ------------------ MODAL (Saved Bills) ------------------ */
-.modal.hidden {
-  display: none;
+
+/* ===========================================================================
+   DASHBOARD CARDS
+=========================================================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 20, 40, 0.28);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
+.dash-card {
+  background: rgba(255,255,255,0.85);
+  padding: 26px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(200,210,230,0.4);
+  box-shadow: var(--panel-shadow);
+
+  transition: 0.25s;
 }
 
-.modal-box {
-  width: 90%;
-  max-width: 800px;
-  background: #fff;
-  padding: 32px;
-  border-radius: 22px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.2);
-  animation: popup 0.25s ease;
-}
-
-@keyframes popup {
-  from { transform: scale(0.95); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-
-#billsTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-#billsTable th {
-  background: #1e3a8a;
-  color: white;
-  padding: 14px;
-}
-
-#billsTable td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-}
-
-#billsTable tr:hover {
-  background: rgba(0, 60, 160, 0.08);
+.dash-card:hover {
+  transform: translateY(-4px);
 }
 
 
-/* ------------------ RESPONSIVE ------------------ */
+
+/* ===========================================================================
+   RESPONSIVE
+=========================================================================== */
+
+@media (max-width: 980px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 820px) {
-  .grid-2 {
-    grid-template-columns: 1fr;
+  .sidebar {
+    width: 200px;
   }
 
-  .app-header {
+  .main-shell {
+    margin-left: 200px;
+  }
+}
+
+@media (max-width: 650px) {
+  .sidebar {
+    position: absolute;
+    width: 100%;
     height: auto;
-    flex-direction: column;
-    gap: 10px;
-    padding-bottom: 20px;
-    text-align: center;
   }
 
-  .logo {
-    height: 55px;
-    width: 55px;
-  }
-
-  .modal-box {
-    width: 95%;
+  .main-shell {
+    margin-left: 0;
+    padding-top: 180px;
   }
 }
