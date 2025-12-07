@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
 
   <!-- Scripts -->
-  <script defer src="tariffs.js"></script>
+  <script defer src="data/tariffs.js"></script>
   <script defer src="app.js"></script>
 </head>
 
@@ -772,23 +772,145 @@
   </div>
 
 </div>
-<!-- SURGERY TEMPLATE -->
-<template id="tpl-surgery-form"> ... </template>
+<!-- ===================================================================
+     SURGERY FORM TEMPLATE (DRAWER)
+=================================================================== -->
+<template id="tpl-surgery-form">
+  <div class="drawer-form">
 
-<!-- INVESTIGATION TEMPLATE -->
-<template id="tpl-investigation-form"> ... </template>
+    <label>Surgery Name</label>
+    <select id="surg_name"></select>
 
-<!-- PHARMACY TEMPLATE -->
-<template id="tpl-pharmacy-item"> ... </template>
+    <label>OT Charges</label>
+    <input type="number" id="surg_ot">
 
-<!-- MISC ITEM TEMPLATE -->
-<template id="tpl-misc-item"> ... </template>
+    <label>Surgeon Charges</label>
+    <input type="number" id="surg_surgeon">
 
-<!-- RECEIPT TEMPLATE -->
-<template id="tpl-receipt-form"> ... </template>
+    <label>Assistant Charges</label>
+    <input type="number" id="surg_assistant">
 
-<!-- DELETE CONFIRM TEMPLATE -->
-<template id="tpl-confirm-delete"> ... </template>
+    <label>Anesthetist Charges</label>
+    <input type="number" id="surg_anes">
+
+    <label>Implant Charges</label>
+    <input type="number" id="surg_implant">
+
+    <label>OT Gas Charges</label>
+    <input type="number" id="surg_gas">
+
+    <label>Consumables</label>
+    <input type="number" id="surg_cons">
+
+    <label>Discount Mode</label>
+    <select id="surg_mode">
+      <option value="none">No Discount</option>
+      <option value="50">50% Package</option>
+      <option value="custom">Custom %</option>
+    </select>
+
+    <label id="lbl_surg_custom" class="hidden">Custom Discount (%)</label>
+    <input id="surg_custom" class="hidden" type="number" placeholder="Enter %">
+
+    <button id="saveSurgery" class="btn primary-btn full">Save Surgery</button>
+  </div>
+</template>
+
+
+
+<!-- ===================================================================
+     INVESTIGATION FORM TEMPLATE
+=================================================================== -->
+<template id="tpl-investigation-form">
+  <div class="drawer-form">
+    <label>Investigation Name</label>
+    <input type="text" id="inv_name">
+
+    <label>Amount</label>
+    <input type="number" id="inv_amount">
+
+    <button id="saveInvestigation" class="btn primary-btn full">Save Investigation</button>
+  </div>
+</template>
+
+
+
+<!-- ===================================================================
+     PHARMACY ITEM TEMPLATE
+=================================================================== -->
+<template id="tpl-pharmacy-item">
+  <div class="drawer-form">
+    <label>Item Name</label>
+    <input type="text" id="pharm_item">
+
+    <label>Qty</label>
+    <input type="number" id="pharm_qty">
+
+    <label>Amount</label>
+    <input type="number" id="pharm_amt">
+
+    <button id="savePharmacyItem" class="btn primary-btn full">Save Item</button>
+  </div>
+</template>
+
+
+
+<!-- ===================================================================
+     MISC ITEM TEMPLATE
+=================================================================== -->
+<template id="tpl-misc-item">
+  <div class="drawer-form">
+    <label>Description</label>
+    <input type="text" id="misc_desc">
+
+    <label>Amount</label>
+    <input type="number" id="misc_amt">
+
+    <button id="saveMiscItem" class="btn primary-btn full">Save Item</button>
+  </div>
+</template>
+
+
+
+<!-- ===================================================================
+     RECEIPT FORM TEMPLATE
+=================================================================== -->
+<template id="tpl-receipt-form">
+  <div class="drawer-form">
+    <label>Receipt Number</label>
+    <input type="text" id="rec_no">
+
+    <label>Date</label>
+    <input type="date" id="rec_date">
+
+    <label>Mode</label>
+    <select id="rec_mode">
+      <option>Cash</option>
+      <option>UPI</option>
+      <option>Card</option>
+      <option>Online Transfer</option>
+      <option>Insurance</option>
+    </select>
+
+    <label>Amount</label>
+    <input type="number" id="rec_amt">
+
+    <button id="saveReceipt" class="btn primary-btn full">Save Receipt</button>
+  </div>
+</template>
+
+
+
+<!-- ===================================================================
+     DELETE CONFIRM
+=================================================================== -->
+<template id="tpl-confirm-delete">
+  <div class="drawer-form">
+    <p style="margin-bottom:20px;font-size:16px;">Are you sure you want to delete this entry?</p>
+    <button id="confirmDeleteYes" class="btn danger-btn full">Yes, Delete</button>
+    <button id="confirmDeleteNo" class="btn full">Cancel</button>
+  </div>
+</template>
 
 </body>
 </html>
