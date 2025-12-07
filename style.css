@@ -1,7 +1,7 @@
 /* ============================================================================
-   KCC BILLING OS — MASTER UI THEME (Ceramic White V6)
-   Fully production ready
-   ========================================================================= */
+   KCC BILLING OS — ULTRA PREMIUM HOSPITAL THEME (C VERSION)
+   Ceramic Matte + Apple-Grade Layout + Medical OS Spacing System
+============================================================================ */
 
 /* -------------------------
    RESET
@@ -14,19 +14,36 @@
 
 html, body {
   font-family: "Manrope", sans-serif;
-  background: #f5f7fb;
+  background: #f4f6fb;
   color: #0b1a33;
   overflow-x: hidden;
   height: 100%;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* -------------------------
-   LAYOUT
+   SPACING SYSTEM
+-------------------------- */
+:root {
+  --radius: 14px;
+  --radius-lg: 22px;
+
+  --card-bg: #ffffff;
+  --border: #e1e7f0;
+  --accent: #3a7bfe;
+  --accent-glow: rgba(58, 123, 254, 0.12);
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 15px 40px rgba(0, 0, 0, 0.06);
+}
+
+/* -------------------------
+   MAIN LAYOUT
 -------------------------- */
 
 .main-shell {
-  margin-left: 260px;
-  padding: 30px;
+  margin-left: 270px;
+  padding: 35px;
   min-height: 100vh;
 }
 
@@ -35,68 +52,78 @@ html, body {
 -------------------------- */
 
 .sidebar {
-  width: 260px;
+  width: 270px;
   background: #ffffff;
-  border-right: 1px solid #dce3ee;
   position: fixed;
   top: 0;
   left: 0;
   height: 100%;
-  padding: 25px 20px;
-  overflow-y: auto;
-  box-shadow: 0 0 30px rgba(0,0,0,0.05);
+  padding: 28px 24px;
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-logo {
-  width: 90px;
-  margin-bottom: 10px;
+  width: 94px;
+  margin-bottom: 8px;
 }
 
 .sidebar-header h2 {
-  font-size: 20px;
-  margin-bottom: 5px;
+  font-size: 22px;
   font-weight: 800;
   color: #003e8a;
+  letter-spacing: -0.2px;
 }
 
 .sidebar-header .tagline {
   font-size: 13px;
-  color: #637082;
+  color: #6d7a92;
+  margin-bottom: 25px;
 }
 
 .sidebar-nav {
-  margin-top: 25px;
+  margin-top: 10px;
 }
 
 .nav-btn {
   width: 100%;
   padding: 12px 16px;
-  background: #eef2f8;
+  margin-bottom: 10px;
+  border-radius: var(--radius);
   border: none;
-  border-radius: 10px;
-  margin-bottom: 12px;
   cursor: pointer;
-  text-align: left;
+  background: #eef2f8;
   font-size: 15px;
-  transition: 0.2s;
+  text-align: left;
+  transition: 0.25s ease;
+  font-weight: 600;
   color: #0b1a33;
 }
 
 .nav-btn:hover {
-  background: #dce8ff;
+  background: #dceaff;
 }
 
 .nav-btn.active {
-  background: #3a7bfe;
-  color: #ffffff;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px var(--accent-glow);
 }
 
 /* -------------------------
-   PAGE PANEL
+   PAGE PANELS
 -------------------------- */
 
 .page {
   display: none;
+  animation: fadeIn 0.28s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .active-page {
@@ -104,10 +131,11 @@ html, body {
 }
 
 .floating-panel {
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 0 25px rgba(0,0,0,0.06);
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
 }
 
 /* -------------------------
@@ -115,7 +143,7 @@ html, body {
 -------------------------- */
 
 h1 {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   margin-bottom: 25px;
   color: #003e8a;
@@ -123,8 +151,9 @@ h1 {
 
 h2 {
   font-size: 20px;
+  font-weight: 700;
   margin-bottom: 18px;
-  color: #1b3e6e;
+  color: #1e3f74;
 }
 
 /* -------------------------
@@ -132,31 +161,33 @@ h2 {
 -------------------------- */
 
 .card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 25px;
-  border: 1px solid #e6edf5;
+  background: var(--card-bg);
+  padding: 22px;
+  border-radius: var(--radius);
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
 }
 
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .dash-card {
-  background: #ffffff;
-  border: 1px solid #dce4f1;
-  border-radius: 14px;
-  padding: 20px;
-  text-align: left;
-  transition: 0.2s;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  transition: 0.25s ease;
+  cursor: pointer;
 }
 
 .dash-card:hover {
   background: #f0f6ff;
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
 }
 
 /* -------------------------
@@ -165,36 +196,56 @@ h2 {
 
 .btn {
   padding: 10px 18px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   border: none;
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: 0.2s;
+  transition: 0.25s ease;
   background: #e7edf9;
 }
 
 .btn:hover {
-  background: #d6e4ff;
+  background: #dceaff;
 }
 
 .btn.primary {
-  background: #3a7bfe;
-  color: #ffffff;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 18px var(--accent-glow);
 }
 
 .btn.primary:hover {
-  background: #2f66d9;
+  background: #2d68e0;
 }
 
-.btn.ghost {
-  background: #f0f2f7;
+/* -------------------------
+   INPUTS
+-------------------------- */
+
+label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: block;
+  color: #6d7a92;
+  font-weight: 600;
 }
 
-.action-buttons {
-  margin-top: 20px;
-  display: flex;
-  gap: 12px;
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid #cad6e6;
+  background: #f9fbff;
+  font-size: 14px;
+  transition: 0.25s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 /* -------------------------
@@ -204,40 +255,13 @@ h2 {
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 18px;
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
-
-/* -------------------------
-   INPUTS
--------------------------- */
-
-label {
-  font-size: 14px;
-  margin-bottom: 4px;
-  display: block;
-  color: #697a90;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #c7d3e0;
-  background: #f9fbff;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: #3a7bfe;
-  background: #ffffff;
-  outline: none;
+  gap: 18px;
 }
 
 /* -------------------------
@@ -250,8 +274,8 @@ table {
 }
 
 th, td {
-  padding: 12px;
-  border-bottom: 1px solid #e6ecf5;
+  padding: 12px 10px;
+  border-bottom: 1px solid #e8edf5;
   font-size: 14px;
 }
 
@@ -259,29 +283,31 @@ th {
   background: #eef4ff;
   color: #003e8a;
   font-weight: 700;
+  text-align: left;
 }
 
 /* -------------------------
-   TOTAL BOX
+   TOTAL BLOCK
 -------------------------- */
 
 .total-box {
   border: 2px solid #d0ecf0;
-  border-radius: 14px;
   padding: 20px;
+  border-radius: var(--radius-lg);
+  background: #f9feff;
 }
 
 .total-line {
-  margin-top: 15px;
   display: flex;
   justify-content: space-between;
-  font-size: 20px;
+  margin-top: 14px;
+  font-size: 22px;
   font-weight: 800;
   color: #003e8a;
 }
 
 /* -------------------------
-   ADMIN PANEL TABS
+   ADMIN TABS
 -------------------------- */
 
 .admin-tab-bar {
@@ -292,14 +318,14 @@ th {
 
 .admin-tab {
   padding: 10px 18px;
+  border-radius: var(--radius);
   background: #eef2f8;
-  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
 }
 
 .admin-tab.active {
-  background: #3a7bfe;
+  background: var(--accent);
   color: #fff;
 }
 
@@ -315,13 +341,14 @@ th {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-top: 10px;
 }
 
 /* -------------------------
-   BILL PREVIEW MODAL BASE
+   PREVIEW MODAL
 -------------------------- */
 
 .preview-overlay {
   display: none;
 }
+
+/* END OF FILE */
