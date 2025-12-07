@@ -1,11 +1,25 @@
 /* ============================================================================
-   KCC BILLING OS — ULTRA PREMIUM HOSPITAL THEME (C VERSION)
-   Ceramic Matte + Apple-Grade Layout + Medical OS Spacing System
+   KCC BILLING OS — STYLE.CSS (ULTRA-PREMIUM HOSPITAL OS THEME)
+   Version C — Ceramic + Minimal + Hospital Professional
 ============================================================================ */
 
-/* -------------------------
-   RESET
--------------------------- */
+/* ============================================================
+   ROOT THEME TOKEN SYSTEM
+============================================================ */
+:root {
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --panel-strong: #f0f3f7;
+  --text: #0b1a33;
+  --text-light: #6b7a99;
+  --primary: #0058c9;
+  --primary-light: #e5f1ff;
+  --border: rgba(0, 0, 0, 0.1);
+  --radius: 14px;
+  --shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* PAGE RESET */
 * {
   margin: 0;
   padding: 0;
@@ -13,342 +27,375 @@
 }
 
 html, body {
-  font-family: "Manrope", sans-serif;
-  background: #f4f6fb;
-  color: #0b1a33;
-  overflow-x: hidden;
+  width: 100%;
   height: 100%;
-  -webkit-font-smoothing: antialiased;
+  font-family: "Manrope", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
 }
 
-/* -------------------------
-   SPACING SYSTEM
--------------------------- */
-:root {
-  --radius: 14px;
-  --radius-lg: 22px;
-
-  --card-bg: #ffffff;
-  --border: #e1e7f0;
-  --accent: #3a7bfe;
-  --accent-glow: rgba(58, 123, 254, 0.12);
-
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 15px 40px rgba(0, 0, 0, 0.06);
+/* Smooth UI */
+button, input, textarea, select {
+  font-family: inherit;
 }
 
-/* -------------------------
-   MAIN LAYOUT
--------------------------- */
-
-.main-shell {
-  margin-left: 270px;
-  padding: 35px;
-  min-height: 100vh;
-}
-
-/* -------------------------
+/* ============================================================================
    SIDEBAR
--------------------------- */
-
+============================================================================ */
 .sidebar {
-  width: 270px;
-  background: #ffffff;
   position: fixed;
   top: 0;
   left: 0;
-  height: 100%;
-  padding: 28px 24px;
+  width: 240px;
+  height: 100vh;
+  background: #ffffff;
   border-right: 1px solid var(--border);
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .sidebar-logo {
-  width: 94px;
-  margin-bottom: 8px;
+  width: 70px;
+  margin-bottom: 10px;
 }
 
 .sidebar-header h2 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  color: #003e8a;
-  letter-spacing: -0.2px;
 }
 
-.sidebar-header .tagline {
-  font-size: 13px;
-  color: #6d7a92;
-  margin-bottom: 25px;
+.tagline {
+  font-size: 12px;
+  color: var(--text-light);
 }
 
 .sidebar-nav {
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .nav-btn {
   width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 10px;
-  border-radius: var(--radius);
+  padding: 12px 15px;
   border: none;
-  cursor: pointer;
-  background: #eef2f8;
-  font-size: 15px;
+  background: var(--panel);
+  border-radius: var(--radius);
   text-align: left;
-  transition: 0.25s ease;
   font-weight: 600;
-  color: #0b1a33;
+  cursor: pointer;
+  transition: 0.2s ease;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .nav-btn:hover {
-  background: #dceaff;
+  background: var(--panel-strong);
 }
 
 .nav-btn.active {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
-/* -------------------------
-   PAGE PANELS
--------------------------- */
+/* ============================================================================
+   MAIN SHELL
+============================================================================ */
+.main-shell {
+  margin-left: 260px;
+  padding: 30px 40px;
+}
 
+/* ============================================================================
+   PAGES
+============================================================================ */
 .page {
   display: none;
-  animation: fadeIn 0.28s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  animation: fade 0.3s ease;
 }
 
 .active-page {
   display: block;
 }
 
-.floating-panel {
-  background: var(--card-bg);
-  padding: 30px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-card);
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* -------------------------
-   HEADINGS
--------------------------- */
-
-h1 {
-  font-size: 30px;
-  font-weight: 800;
-  margin-bottom: 25px;
-  color: #003e8a;
-}
-
-h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 18px;
-  color: #1e3f74;
-}
-
-/* -------------------------
+/* ============================================================================
    CARDS
--------------------------- */
-
+============================================================================ */
 .card {
-  background: var(--card-bg);
+  background: var(--panel);
   padding: 22px;
   border-radius: var(--radius);
-  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+  margin-bottom: 25px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-soft);
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+.card h2 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: var(--primary);
 }
 
-.dash-card {
-  padding: 22px;
-  border-radius: var(--radius-lg);
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  transition: 0.25s ease;
-  cursor: pointer;
-}
-
-.dash-card:hover {
-  background: #f0f6ff;
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
-}
-
-/* -------------------------
-   BUTTONS
--------------------------- */
-
-.btn {
-  padding: 10px 18px;
-  border-radius: var(--radius);
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: 0.25s ease;
-  background: #e7edf9;
-}
-
-.btn:hover {
-  background: #dceaff;
-}
-
-.btn.primary {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 4px 18px var(--accent-glow);
-}
-
-.btn.primary:hover {
-  background: #2d68e0;
-}
-
-/* -------------------------
-   INPUTS
--------------------------- */
-
-label {
-  font-size: 14px;
-  margin-bottom: 6px;
-  display: block;
-  color: #6d7a92;
-  font-weight: 600;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  border: 1px solid #cad6e6;
-  background: #f9fbff;
-  font-size: 14px;
-  transition: 0.25s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-/* -------------------------
+/* ============================================================================
    GRID SYSTEM
--------------------------- */
-
+============================================================================ */
 .grid-2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(2,1fr);
+  gap: 16px;
 }
 
 .grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(3,1fr);
+  gap: 16px;
 }
 
-/* -------------------------
-   TABLES
--------------------------- */
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+}
 
+/* ============================================================================
+   INPUTS + FORMS
+============================================================================ */
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-light);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 86, 201, 0.15);
+  outline: none;
+}
+
+/* ============================================================================
+   BUTTONS
+============================================================================ */
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  opacity: 0.9;
+}
+
+.btn.ghost {
+  background: #f2f4f7;
+  color: var(--text);
+}
+
+.btn.ghost:hover {
+  background: #e6e9ef;
+}
+
+/* ============================================================================
+   TABLES
+============================================================================ */
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th, td {
+table thead {
+  background: var(--primary-light);
+}
+
+table th, table td {
   padding: 12px 10px;
-  border-bottom: 1px solid #e8edf5;
+  border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
 
-th {
-  background: #eef4ff;
-  color: #003e8a;
-  font-weight: 700;
+table th {
   text-align: left;
+  color: var(--primary);
+  font-weight: 700;
 }
 
-/* -------------------------
-   TOTAL BLOCK
--------------------------- */
+table tr:hover td {
+  background: #f6f9ff;
+}
 
+.delete-row-btn {
+  background: #ffdfdf;
+  color: #c40000;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ============================================================================
+   DASHBOARD CARDS
+============================================================================ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 24px;
+}
+
+.dash-card {
+  background: var(--panel);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.dash-card h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.dash-card p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+/* ============================================================================
+   TOTAL SUMMARY BOX
+============================================================================ */
 .total-box {
-  border: 2px solid #d0ecf0;
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  background: #f9feff;
+  border: 2px solid var(--primary-light);
+}
+
+.total-meta {
+  margin-bottom: 10px;
+}
+
+.meta-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: var(--text-light);
 }
 
 .total-line {
   display: flex;
   justify-content: space-between;
-  margin-top: 14px;
-  font-size: 22px;
-  font-weight: 800;
-  color: #003e8a;
-}
-
-/* -------------------------
-   ADMIN TABS
--------------------------- */
-
-.admin-tab-bar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.admin-tab {
-  padding: 10px 18px;
+  margin-top: 15px;
+  padding: 12px;
+  background: var(--primary-light);
   border-radius: var(--radius);
-  background: #eef2f8;
-  cursor: pointer;
-  font-weight: 600;
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: 800;
 }
 
-.admin-tab.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-.admin-tab-content {
-  display: none;
-}
-
-.active-admin-tab {
-  display: block;
-}
-
-.permissions-box {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-/* -------------------------
-   PREVIEW MODAL
--------------------------- */
-
+/* ============================================================================
+   MODAL (PDF PREVIEW)
+============================================================================ */
 .preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
   display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
 
-/* END OF FILE */
+.preview-container {
+  background: #fff;
+  width: 85%;
+  height: 85vh;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  padding: 15px 20px;
+  background: var(--primary-light);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
+.preview-actions {
+  padding: 12px;
+  background: #fafafa;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ============================================================================
+   RESPONSIVE
+============================================================================ */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2,1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-shell {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .grid-3, .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
