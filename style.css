@@ -1,401 +1,586 @@
-/* ============================================================================
-   KCC BILLING OS — STYLE.CSS (ULTRA-PREMIUM HOSPITAL OS THEME)
-   Version C — Ceramic + Minimal + Hospital Professional
-============================================================================ */
-
-/* ============================================================
-   ROOT THEME TOKEN SYSTEM
-============================================================ */
+/* -------------------------------------------------------------
+   ROOT VARIABLES — LIGHT MODE (DEFAULT)
+------------------------------------------------------------- */
 :root {
-  --bg: #f5f7fa;
-  --panel: #ffffff;
-  --panel-strong: #f0f3f7;
-  --text: #0b1a33;
-  --text-light: #6b7a99;
-  --primary: #0058c9;
-  --primary-light: #e5f1ff;
-  --border: rgba(0, 0, 0, 0.1);
-  --radius: 14px;
-  --shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  --bg: #f7fafc;
+  --panel-bg: #ffffff;
+  --sidebar-bg: #0f172a;
+  --sidebar-hover: #1e293b;
+  --sidebar-text: #e2e8f0;
+  --sidebar-active: #38bdf8;
+
+  --text: #1e293b;
+  --text-light: #64748b;
+
+  --primary: #009ea4;     /* soft teal */
+  --primary-dark: #007f83;
+
+  --border: #e2e8f0;
+  --radius: 10px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 16px rgba(0,0,0,0.05);
+
+  --drawer-bg: #ffffff;
+
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+
+  --table-header-bg: #eaf6f7;
+
+  --scrollbar-bg: #cbd5e1;
+  --scrollbar-thumb: #007f83;
 }
 
-/* PAGE RESET */
+/* -------------------------------------------------------------
+   DARK MODE
+------------------------------------------------------------- */
+html[data-theme="dark"] {
+  --bg: #0f1a24;
+  --panel-bg: #182635;
+  --sidebar-bg: #0b111a;
+  --sidebar-hover: #1e293b;
+  --sidebar-text: #cbd5e1;
+  --sidebar-active: #38bdf8;
+
+  --text: #f1f5f9;
+  --text-light: #94a3b8;
+
+  --primary: #38bdf8;
+  --primary-dark: #0ea5e9;
+
+  --border: #243447;
+
+  --card-bg: #1e293b;
+  --card-shadow: none;
+  --drawer-bg: #1e293b;
+
+  --input-bg: #1e293b;
+  --input-border: #334155;
+
+  --table-header-bg: #223344;
+
+  --scrollbar-bg: #334155;
+  --scrollbar-thumb: #0ea5e9;
+}
+
+/* -------------------------------------------------------------
+   GLOBAL RESET
+------------------------------------------------------------- */
 * {
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   box-sizing: border-box;
+  font-family: "Manrope", sans-serif;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  font-family: "Manrope", sans-serif;
+body {
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
 }
 
-/* Smooth UI */
-button, input, textarea, select {
-  font-family: inherit;
+h1, h2, h3, h4 { font-weight: 700; }
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
 }
 
-/* ============================================================================
-   SIDEBAR
-============================================================================ */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
+/* -------------------------------------------------------------
+   CUSTOM SCROLLBAR
+------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+}
+
+/* -------------------------------------------------------------
+   APP WRAPPER
+------------------------------------------------------------- */
+.app-wrapper {
+  display: flex;
+  width: 100%;
   height: 100vh;
-  background: #ffffff;
-  border-right: 1px solid var(--border);
-  padding: 20px;
-  overflow-y: auto;
 }
 
-.sidebar-header {
-  text-align: center;
-  margin-bottom: 30px;
+/* -------------------------------------------------------------
+   SIDEBAR (COLLAPSIBLE)
+------------------------------------------------------------- */
+.sidebar {
+  width: 240px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  transition: width 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 70px;
 }
 
 .sidebar-logo {
-  width: 70px;
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px;
 }
-
-.sidebar-header h2 {
-  font-size: 20px;
-  font-weight: 800;
+.sidebar-logo img {
+  width: 34px;
+  height: 34px;
 }
-
-.tagline {
-  font-size: 12px;
-  color: var(--text-light);
+.sidebar-logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  transition: opacity 0.3s;
+}
+.sidebar.collapsed .sidebar-logo-text {
+  opacity: 0;
 }
 
 .sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex: 1;
+  margin-top: 10px;
 }
 
-.nav-btn {
+.nav-item {
   width: 100%;
-  padding: 12px 15px;
-  border: none;
-  background: var(--panel);
-  border-radius: var(--radius);
-  text-align: left;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--sidebar-text);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  transition: 0.2s;
 }
+.nav-item i { font-size: 20px; }
 
-.nav-btn:hover {
-  background: var(--panel-strong);
-}
-
-.nav-btn.active {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-/* ============================================================================
-   MAIN SHELL
-============================================================================ */
-.main-shell {
-  margin-left: 260px;
-  padding: 30px 40px;
-}
-
-/* ============================================================================
-   PAGES
-============================================================================ */
-.page {
+.sidebar.collapsed .nav-item span {
   display: none;
-  animation: fade 0.3s ease;
 }
 
-.active-page {
+.nav-item:hover {
+  background: var(--sidebar-hover);
+}
+
+/* Active navigation styling handled via JS */
+.nav-item.active {
+  background: var(--sidebar-active);
+  color: #fff;
+}
+
+.sidebar-toggle {
+  width: 100%;
+  padding: 12px;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
+}
+
+/* -------------------------------------------------------------
+   TOPBAR
+------------------------------------------------------------- */
+.topbar {
+  height: 70px;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+}
+
+.topbar-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.topbar-btn {
+  background: transparent;
+  padding: 8px;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.topbar-user i {
+  font-size: 22px;
+  color: var(--text);
+}
+
+/* -------------------------------------------------------------
+   MAIN PANEL
+------------------------------------------------------------- */
+.main-panel {
+  flex: 1;
+  margin-left: 240px;
+  padding: 90px 30px 40px;
+  transition: margin-left 0.25s;
+}
+
+.sidebar.collapsed + .main-panel {
+  margin-left: 70px;
+}
+
+.panel {
+  display: none;
+}
+.panel.active {
   display: block;
 }
 
-@keyframes fade {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.panel-title {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
-/* ============================================================================
-   CARDS
-============================================================================ */
-.card {
-  background: var(--panel);
-  padding: 22px;
+/* -------------------------------------------------------------
+   DASHBOARD
+------------------------------------------------------------- */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.dash-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.dash-card-icon {
+  font-size: 32px;
+  color: var(--primary);
+}
+
+.dash-card-content h3 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.chart-box {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+}
+
+.dashboard-charts {
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.dashboard-actions {
+  margin-top: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-btn {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  font-size: 15px;
+}
+
+.search-bill {
+  display: flex;
+  gap: 8px;
+}
+.search-bill input {
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  width: 220px;
+}
+.search-bill button {
+  background: var(--primary);
+  padding: 0 16px;
+  color: #fff;
+  border-radius: var(--radius);
+}
+
+.dashboard-alerts {
+  margin-top: 25px;
+  background: var(--panel-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+}
+
+/* -------------------------------------------------------------
+   BILLING PAGE (TWO COLUMN)
+------------------------------------------------------------- */
+.bill-wrapper {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  gap: 25px;
+}
+
+.form-section {
+  background: var(--panel-bg);
+  padding: 18px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 25px;
-  border: 1px solid var(--border);
+  margin-bottom: 20px;
 }
 
-.card h2 {
-  margin-bottom: 15px;
+.form-section h3 {
+  margin-bottom: 10px;
   font-size: 18px;
-  color: var(--primary);
 }
 
-/* ============================================================================
-   GRID SYSTEM
-============================================================================ */
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 16px;
-}
-
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 16px;
-}
-
-.grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 16px;
-}
-
-/* ============================================================================
-   INPUTS + FORMS
-============================================================================ */
 label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 14px;
+  margin-top: 10px;
   color: var(--text-light);
 }
 
 input, select, textarea {
   width: 100%;
-  padding: 11px 12px;
+  padding: 10px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: #fff;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
   font-size: 14px;
-  transition: 0.2s ease;
+  margin-top: 4px;
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(0, 86, 201, 0.15);
-  outline: none;
+textarea {
+  resize: vertical;
+  height: 70px;
 }
 
-/* ============================================================================
-   BUTTONS
-============================================================================ */
-.btn {
-  padding: 10px 20px;
-  border-radius: var(--radius);
-  font-weight: 600;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.btn.primary {
-  background: var(--primary);
-  color: #fff;
-}
-
-.btn.primary:hover {
-  opacity: 0.9;
-}
-
-.btn.ghost {
-  background: #f2f4f7;
-  color: var(--text);
-}
-
-.btn.ghost:hover {
-  background: #e6e9ef;
-}
-
-/* ============================================================================
-   TABLES
-============================================================================ */
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-table thead {
-  background: var(--primary-light);
-}
-
-table th, table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 14px;
-}
-
-table th {
-  text-align: left;
-  color: var(--primary);
-  font-weight: 700;
-}
-
-table tr:hover td {
-  background: #f6f9ff;
-}
-
-.delete-row-btn {
-  background: #ffdfdf;
-  color: #c40000;
-  padding: 6px 10px;
-  border-radius: var(--radius);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-/* ============================================================================
-   DASHBOARD CARDS
-============================================================================ */
-.dashboard-grid {
+.two-input {
   display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 24px;
-}
-
-.dash-card {
-  background: var(--panel);
-  padding: 24px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-}
-
-.dash-card h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.dash-card p {
-  font-size: 14px;
-  color: var(--text-light);
-  margin-bottom: 12px;
-}
-
-/* ============================================================================
-   TOTAL SUMMARY BOX
-============================================================================ */
-.total-box {
-  border: 2px solid var(--primary-light);
-}
-
-.total-meta {
-  margin-bottom: 10px;
-}
-
-.meta-line {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  color: var(--text-light);
-}
-
-.total-line {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  padding: 12px;
-  background: var(--primary-light);
-  border-radius: var(--radius);
-  font-size: 18px;
-  color: var(--primary);
-  font-weight: 800;
-}
-
-/* ============================================================================
-   MODAL (PDF PREVIEW)
-============================================================================ */
-.preview-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.45);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.preview-container {
-  background: #fff;
-  width: 85%;
-  height: 85vh;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-header {
-  padding: 15px 20px;
-  background: var(--primary-light);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.preview-frame {
-  flex: 1;
-  border: none;
-  width: 100%;
-}
-
-.preview-actions {
-  padding: 12px;
-  background: #fafafa;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: flex-end;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* ============================================================================
-   RESPONSIVE
-============================================================================ */
-@media (max-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(2,1fr);
-  }
+/* -------------------------------------------------------------
+   BILL RIGHT PANEL — SECTIONS
+------------------------------------------------------------- */
+.bill-section {
+  background: var(--panel-bg);
+  margin-bottom: 25px;
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
-@media (max-width: 768px) {
-  .main-shell {
-    margin-left: 0;
-    padding: 20px;
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .grid-3, .grid-2 {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
+.bill-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.bill-section-body {
+  margin-top: 12px;
+}
+
+/* -------------------------------------------------------------
+   TABLES
+------------------------------------------------------------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.table thead {
+  background: var(--table-header-bg);
+}
+
+.table th, .table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.table td:last-child {
+  width: 40px;
+  text-align: right;
+}
+
+/* -------------------------------------------------------------
+   SUMMARY BOX
+------------------------------------------------------------- */
+.bill-summary {
+  background: var(--panel-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+/* -------------------------------------------------------------
+   BUTTONS
+------------------------------------------------------------- */
+.btn {
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #fff;
+  font-size: 15px;
+}
+
+.btn.primary-btn {
+  background: var(--primary-dark);
+}
+
+.btn.danger-btn {
+  background: #dc2626;
+}
+
+.small-btn {
+  padding: 8px 14px;
+}
+
+/* mini buttons */
+.mini-add-btn, .mini-toggle-btn {
+  background: var(--primary);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+}
+
+/* -------------------------------------------------------------
+   COLLAPSIBLE
+------------------------------------------------------------- */
+.collapsible.hidden {
+  display: none;
+}
+
+/* -------------------------------------------------------------
+   DRAWER MODAL (Right Side)
+------------------------------------------------------------- */
+.drawer-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 900;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s;
+}
+
+.drawer-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0; right: -420px;
+  width: 420px;
+  height: 100%;
+  background: var(--drawer-bg);
+  box-shadow: -4px 0 12px rgba(0,0,0,0.1);
+  padding: 20px;
+  z-index: 1000;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+.drawer.active {
+  right: 0;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawer-close {
+  background: transparent;
+  font-size: 24px;
+}
+
+.drawer-content {
+  margin-top: 20px;
+}
+
+/* -------------------------------------------------------------
+   TARIFF MASTER
+------------------------------------------------------------- */
+.tariff-wrapper {
+  background: transparent;
+}
+
+.tariff-block {
+  background: var(--panel-bg);
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.tariff-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tariff-category {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.tariff-category-header {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  background: var(--table-header-bg);
+}
+
+.tariff-category-body {
+  padding: 12px;
+}
+
+/* -------------------------------------------------------------
+   DARK MODE EXTRAS
+------------------------------------------------------------- */
+html[data-theme="dark"] .dash-card {
+  background: var(--panel-bg);
+}
+
+html[data-theme="dark"] .table thead {
+  background: var(--sidebar-hover);
+}
+
+html[data-theme="dark"] .btn.primary-btn {
+  background: var(--primary);
+}
+
