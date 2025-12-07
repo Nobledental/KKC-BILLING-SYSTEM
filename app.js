@@ -133,14 +133,17 @@ qs("#addVisitBtn").addEventListener("click", () => {
 });
 
 /* ============================================================
-   SURGERIES
+   SURGERIES — ADVANCED PACKAGE + BREAKUP MODEL (AUTO MODE)
 ============================================================ */
 qs("#addSurgeryBtn").onclick = () => {
+
   const surgNames = Object.values(tariff.surgeries).flat();
 
   openDrawer("Add Surgery", "tpl-surgery-form");
 
   const select = drawerContent.querySelector("#surg_name");
+
+  // Load surgery list
   surgNames.forEach(s => {
     const o = document.createElement("option");
     o.value = s.name;
@@ -148,9 +151,11 @@ qs("#addSurgeryBtn").onclick = () => {
     select.appendChild(o);
   });
 
+  // Auto-fill breakups when selecting surgery
   select.onchange = () => {
     const obj = surgNames.find(x => x.name === select.value);
     if (!obj) return;
+
     drawerContent.querySelector("#surg_ot").value = obj.ot;
     drawerContent.querySelector("#surg_surgeon").value = obj.surgeon;
     drawerContent.querySelector("#surg_assistant").value = obj.assistant;
@@ -158,20 +163,44 @@ qs("#addSurgeryBtn").onclick = () => {
     drawerContent.querySelector("#surg_implant").value = obj.implant;
     drawerContent.querySelector("#surg_gas").value = obj.gas;
     drawerContent.querySelector("#surg_cons").value = obj.consumables;
+
+    // Auto compute subtotal
+    updateSurgerySubtotal();
   };
 
-  drawerContent.querySelector("#surg_mode").onchange = e => {
-    const custom = drawerContent.querySelector("#surg_custom");
-    const lbl = drawerContent.querySelector("#lbl_surg_custom");
-    if (e.target.value === "custom") {
-      custom.classList.remove("hidden");
-      lbl.classList.remove("hidden");
-    } else {
-      custom.classList.add("hidden");
-      lbl.classList.add("hidden");
+  // Auto calculate subtotal → package total
+  function updateSurgerySubtotal() {
+    const ot = +drawerContent.querySelector("#surg_ot").value || 0;
+    const sur = +drawerContent.querySelector("#surg_surgeon").value || 0;
+    const ast = +drawerContent.querySelector("#surg_assistant").value || 0;
+    const ane = +drawerContent.querySelector("#surg_anes").value || 0;
+    const imp = +drawerContent.querySelector("#surg_implant").value || 0;
+    const gas = +drawerContent.querySelector("#surg_gas").value || 0;
+    const con = +drawerContent.querySelector("#surg_cons").value || 0;
+
+    const subtotal = ot + sur + ast + ane + imp + gas + con;
+
+    drawerContent.querySelector("#surg_subtotal").value = subtotal;
+
+    const mode = drawerContent.querySelector("#surg_mode").value;
+    let final = subtotal;
+
+    if (mode === "50") final = subtotal * 0.5;
+    if (mode === "custom") {
+      const c = +drawerContent.querySelector("#surg_custom").value || 0;
+      final = subtotal * (100 - c) / 100;
     }
-  };
 
+    drawerContent.querySelector("#surg_final").value = final;
+  }
+
+  // Listen to any value change
+  qsa("input", drawerContent).forEach(f => {
+    f.oninput = updateSurgerySubtotal;
+  });
+  drawerContent.querySelector("#surg_mode").onchange = updateSurgerySubtotal;
+
+  // Save Surgery
   drawerContent.querySelector("#saveSurgery").onclick = () => {
     const d = {
       name: drawerContent.querySelector("#surg_name").value,
@@ -182,8 +211,10 @@ qs("#addSurgeryBtn").onclick = () => {
       implant: +drawerContent.querySelector("#surg_implant").value,
       gas: +drawerContent.querySelector("#surg_gas").value,
       cons: +drawerContent.querySelector("#surg_cons").value,
+      subtotal: +drawerContent.querySelector("#surg_subtotal").value,
+      final: +drawerContent.querySelector("#surg_final").value,
       mode: drawerContent.querySelector("#surg_mode").value,
-      custom: +drawerContent.querySelector("#surg_custom").value || 0,
+      custom: +drawerContent.querySelector("#surg_custom").value || 0
     };
 
     bill.surgeries.push(d);
@@ -193,25 +224,40 @@ qs("#addSurgeryBtn").onclick = () => {
   };
 };
 
+// Render surgeries in UI
 function renderSurgeries() {
   const box = qs("#surgeryList");
   box.innerHTML = "";
+
   bill.surgeries.forEach((s, i) => {
     const wrap = document.createElement("div");
     wrap.className = "surgery-row";
     wrap.innerHTML = `
-      <div><strong>${s.name}</strong></div>
-      <div>Mode: ${s.mode}${s.mode === "custom" ? ` (${s.custom}%)` : ""}</div>
+      <div class="surg-top-title">
+        <strong>${i + 1}. ${s.name}</strong>
+        <span class="surg-final">₹${s.final}</span>
+      </div>
+
+      <div class="surg-breakup">
+        OT: ₹${s.ot}, Surgeon: ₹${s.surgeon}, Assistant: ₹${s.assistant}, 
+        Anes: ₹${s.anesthetist}, Implant: ₹${s.implant}, Gas: ₹${s.gas}, Cons: ₹${s.cons}
+        <br>
+        <small>Subtotal: ₹${s.subtotal} | Mode: ${s.mode === "custom" ? s.custom + "% Off" : s.mode}</small>
+      </div>
+
       <button class="mini-add-btn remove"><i class="ri-delete-bin-line"></i></button>
     `;
+
     wrap.querySelector(".remove").onclick = () => {
       bill.surgeries.splice(i, 1);
       renderSurgeries();
       calculateTotals();
     };
+
     box.append(wrap);
   });
 }
+
 
 /* ============================================================
    PHARMACY
