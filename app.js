@@ -446,217 +446,453 @@ loadDashboard();
    PDF ENGINE (ULTRA PREMIUM)
 ============================================================ */
 async function generatePremiumPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-  const left = 40;
-  let y = 40;
+    /* ============================================================
+       SAFE START OFFSET FOR PRE-PRINTED HEADER (CHOSEN BY ME)
+       (PREVENTS OVERLAP WITH HOSPITAL FLYER HEADER)
+    ============================================================ */
+    const OFFSET = 130;   // <-- CHOSEN BY ME (Option B)
 
-  try {
-    const logo = await loadImage("assets/logo.png");
-    doc.addImage(logo, "PNG", left, y, 60, 60);
-  } catch (e) {}
+    const left = 40;
+    let y = OFFSET;
 
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("Krishna Kidney Centre", left + 80, y + 25);
+    /* ============================================================
+       GENERATE BARCODE (CODE128)
+    ============================================================ */
+    const billNo = qs("#bill_no").value || "000000000000";
 
-  doc.setFontSize(13);
-  doc.setFont("Helvetica", "normal");
-  doc.text("Final Hospital Bill (A4)", left + 80, y + 45);
+    JsBarcode("#barcodeSvg", billNo, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 50,
+        displayValue: false
+    });
 
-  y += 90;
+    const barcodeImg = await loadImage(
+        document.querySelector("#barcodeSvg").toDataURL()
+    );
 
-  /* PATIENT DETAILS */
-  sectionHeader(doc, "Patient Information", y);
-  y += 30;
+    /* ============================================================
+       QR CODE
+    ============================================================ */
+    const qrCanvas = document.createElement("canvas");
+    new QRCode(qrCanvas, { text: billNo, width: 80, height: 80 });
 
-  const p = {
-    name: qs("#pt_name").value,
-    id: qs("#pt_id").value,
-    age: qs("#pt_age").value,
-    gender: qs("#pt_gender").value,
-    address: qs("#pt_address").value,
-    dept: qs("#pt_dept").value,
-    doctor: qs("#pt_doctor").value,
-    admit: qs("#admit_date").value,
-    discharge: qs("#discharge_date").value,
-    los: qs("#los").value,
-    insurance: qs("#insurance_flag").value,
-    policy: qs("#insurance_name").value,
-    claim: qs("#insurance_claim").value
+    /* ============================================================
+       HEADER (DUAL COLUMN — PREMIUM)
+       LEFT: Nothing (pre-printed)
+       RIGHT: QR + BARCODE + BILL NO
+    ============================================================ */
+    const rightStart = 400;
+
+    // QR
+    doc.addImage(qrCanvas.toDataURL("image/png"), "PNG", rightStart, y, 80, 80);
+
+    // Barcode
+    doc.addImage(barcodeImg, "PNG", rightStart - 5, y + 85, 170, 50);
+
+    // Bill number text
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(`Bill No: ${billNo}`, rightStart + 20, y + 145);
+
+    y += 170;
+
+    /* ============================================================
+       PATIENT INFORMATION
+    ============================================================ */
+    sectionHeader(doc, "Patient Information", y);
+    y += 25;
+
+    const p = {
+        name: qs("#pt_name").value,
+        id: qs("#pt_id").value,
+        age: qs("#pt_age").value,
+        gender: qs("#pt_gender").value,
+        address: qs("#pt_address").value,
+        dept: qs("#pt_dept").value,
+        doctor: qs("#pt_doctor").value,
+        admit: qs("#admit_date").value,
+        discharge: qs("#discharge_date").value,
+        los: qs("#los").value,
+        insurance: qs("#insurance_flag").value,
+        policy: qs("#insurance_name").value,
+        claim: qs("#insurance_claim").value
+    };
+
+    const patientRows = [
+        ["Patient Name", p.name],
+        ["IP Number", p.id],
+        ["Age / Gender", `${p.age} / ${p.gender}`],
+        ["Address", p.address],
+        ["Department", p.dept],
+        ["Consultant", p.doctor],
+        ["Admission Date", p.admit],
+        ["Discharge Date", p.discharge],
+        ["Length of Stay", `${p.los} days`],
+        ["Insurance", p.insurance === "yes" ? p.policy : "No"],
+        ["Claim Number", p.claim]
+    ];
+
+    autoTable(doc, patientRows, y);
+    y = doc.lastAutoTable.finalY + 25;
+
+    /* ============================================================
+       ROOM & DAILY CHARGES
+    ============================================================ */
+    sectionHeader(doc, "Room & Daily Charges", y);
+    y += 25;
+
+    const los = Number(p.los) || 1;
+
+    const roomRows = [
+        [`Room Rent × ${los}`, (+qs("#room_rent").value || 0) * los],
+        [`Nursing × ${los}`, (+qs("#nursing_charge").value || 0) * los],
+        [`Duty Doctor × ${los}`, (+qs("#duty_charge").value || 0) * los]
+    ];
+
+    autoTable(doc, roomRows, y);
+    y = doc.lastAutoTable.finalY + 25;
+
+    /* ============================================================
+       CONSULTANT VISITS
+    ============================================================ */
+    if (bill.visits.length) {
+        sectionHeader(doc, "Consultant Visits", y);
+        y += 25;
+
+        const visitRows = bill.visits.map(v => [
+            `${v.date} (${v.count} visits)`,
+            v.count * (+qs("#consultant_charge").value || 0)
+        ]);
+
+        autoTable(doc, visitRows, y);
+        y = doc.lastAutoTable.finalY + 25;
+    }
+
+    /* ============================================================
+       SURGERIES — PREMIUM ADVANCED UI
+    ============================================================ */
+    if (bill.surgeries.length) {
+        sectionHeader(doc, "Surgical Procedures", y);
+        y += 15;
+
+        bill.surgeries.forEach((s, i) => {
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text(`${i + 1}. ${s.name}`, left, y + 20);
+
+            let subtotal =
+                s.ot +
+                s.surgeon +
+                s.assistant +
+                s.anesthetist +
+                s.implant +
+                s.gas +
+                s.cons;
+
+            let discountLabel = "None";
+            let finalAmount = subtotal;
+
+            if (s.mode === "50") {
+                discountLabel = "50% Package";
+                finalAmount = subtotal * 0.5;
+            }
+            if (s.mode === "custom") {
+                discountLabel = `${s.custom}% Off`;
+                finalAmount = subtotal * (100 - s.custom) / 100;
+            }
+
+            const surgTable = [
+                ["OT Charges", s.ot],
+                ["Surgeon", s.surgeon],
+                ["Assistant", s.assistant],
+                ["Anesthetist", s.anesthetist],
+                ["Implants", s.implant],
+                ["OT Gas", s.gas],
+                ["Consumables", s.cons],
+                ["Subtotal", subtotal],
+                ["Discount", discountLabel],
+                ["Final Total", finalAmount]
+            ];
+
+            autoTable(doc, surgTable, y + 25);
+            y = doc.lastAutoTable.finalY + 20;
+        });
+    }
+
+    /* ============================================================
+       PHARMACY
+    ============================================================ */
+    sectionHeader(doc, "Pharmacy Charges", y);
+    y += 25;
+
+    autoTable(doc, [["Pharmacy Total", +qs("#pharmacy_total").value]], y);
+    y = doc.lastAutoTable.finalY + 15;
+
+    if (bill.pharmacy.length) {
+        const rows = bill.pharmacy.map(x => [x.item, x.qty, x.amt]);
+        autoTable(doc, rows, y, ["Item", "Qty", "Amount"]);
+        y = doc.lastAutoTable.finalY + 25;
+    }
+
+    /* ============================================================
+       INVESTIGATIONS
+    ============================================================ */
+    if (bill.investigations.length) {
+        sectionHeader(doc, "Investigations", y);
+        y += 25;
+
+        autoTable(
+            doc,
+            bill.investigations.map(i => [i.name, i.amt]),
+            y,
+            ["Investigation", "Amount"]
+        );
+        y = doc.lastAutoTable.finalY + 25;
+    }
+
+    /* ============================================================
+       MISCELLANEOUS
+    ============================================================ */
+    if (bill.misc.length) {
+        sectionHeader(doc, "Miscellaneous Charges", y);
+        y += 25;
+
+        autoTable(
+            doc,
+            bill.misc.map(m => [m.desc, m.amt]),
+            y,
+            ["Description", "Amount"]
+        );
+        y = doc.lastAutoTable.finalY + 25;
+    }
+
+    /* ============================================================
+       RECEIPTS
+    ============================================================ */
+    sectionHeader(doc, "Receipts", y);
+    y += 25;
+
+    autoTable(
+        doc,
+        bill.receipts.map(r => [r.no, r.date, r.mode, r.amt]),
+        y,
+        ["Receipt No", "Date", "Mode", "Amount"]
+    );
+    y = doc.lastAutoTable.finalY + 25;
+
+    /* ============================================================
+       FINAL SUMMARY
+    ============================================================ */
+    sectionHeader(doc, "Final Summary", y);
+    y += 25;
+
+    autoTable(
+        doc,
+        [
+            ["Gross Amount", qs("#gross_amount").value],
+            ["Total Received", qs("#total_receipts").value],
+            ["Balance Amount", qs("#balance_amount").value]
+        ],
+        y
+    );
+    y = doc.lastAutoTable.finalY + 25;
+
+    /* ============================================================
+       AMOUNT IN WORDS
+    ============================================================ */
+    const words = convertAmountToWords(+qs("#balance_amount").value);
+
+    doc.setFont("Helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text(`Amount in Words:`, left, y);
+
+    doc.setFont("Helvetica", "normal");
+    doc.text(words, left, y + 20);
+
+    y += 50;
+
+    /* ============================================================
+       FOOTER (OPTION 1 + OPTION 4 COMBINED)
+    ============================================================ */
+    doc.setFontSize(11);
+    doc.setFont("Helvetica", "normal");
+    doc.text(
+        "This is a computer-generated bill. No signature required.",
+        left,
+        doc.internal.pageSize.height - 80
+    );
+
+    doc.setFont("Helvetica", "bold");
+    doc.text(
+        "Thank you for choosing Krishna Kidney Centre",
+        left,
+        doc.internal.pageSize.height - 55
+    );
+
+    doc.setFont("Helvetica", "normal");
+    doc.text(
+        "24/7 Emergency & Urology Services",
+        left,
+        doc.internal.pageSize.height - 40
+    );
+
+    doc.text(
+        "Urology · Nephrology · Stone Clinic · Laparoscopy · ICU · Pharmacy",
+        left,
+        doc.internal.pageSize.height - 25
+    );
+
+    /* ============================================================
+       PAGE NUMBERING
+    ============================================================ */
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text(
+            `Page ${i} of ${totalPages}`,
+            doc.internal.pageSize.width - 70,
+            doc.internal.pageSize.height - 15
+        );
+    }
+
+    /* ============================================================
+       SAVE PDF
+    ============================================================ */
+    doc.save(`KCC_Final_Bill_${billNo}.pdf`);
+}
+
+
+/* ============================================================
+   INDEXEDDB — BILL STORAGE ENGINE
+============================================================ */
+let db;
+
+function initDB() {
+  const req = indexedDB.open("KCC_BILLING_DB", 1);
+
+  req.onupgradeneeded = (e) => {
+    db = e.target.result;
+
+    if (!db.objectStoreNames.contains("bills")) {
+      db.createObjectStore("bills", { keyPath: "bill_no" });
+    }
   };
 
-  const patientRows = [
-    ["Patient Name", p.name],
-    ["IP Number", p.id],
-    ["Age / Gender", `${p.age} / ${p.gender}`],
-    ["Address", p.address],
-    ["Department", p.dept],
-    ["Consultant", p.doctor],
-    ["Admission Date", p.admit],
-    ["Discharge Date", p.discharge],
-    ["Length of Stay", p.los + " days"],
-    ["Insurance", p.insurance === "yes" ? p.policy : "No"],
-    ["Claim Number", p.claim]
-  ];
+  req.onsuccess = (e) => {
+    db = e.target.result;
+    loadBillHistory();
+  };
 
-  autoTable(doc, patientRows, y);
-  y = doc.lastAutoTable.finalY + 30;
+  req.onerror = () => console.error("IndexedDB error");
+}
 
-  /* ROOM CHARGES */
-  sectionHeader(doc, "Room & Daily Charges", y);
-  y += 30;
+initDB();
 
-  const los = +p.los || 1;
-  const roomRows = [
-    ["Room Rent × " + los, +qs("#room_rent").value * los],
-    ["Nursing × " + los, +qs("#nursing_charge").value * los],
-    ["Duty Doctor × " + los, +qs("#duty_charge").value * los],
-  ];
+/* Save Bill */
+function saveBill() {
+  const data = {
+    bill_no: qs("#bill_no").value,
+    patient: qs("#pt_name").value,
+    date: qs("#discharge_date").value,
+    total: qs("#gross_amount").value,
+    paid: qs("#total_receipts").value,
+    balance: qs("#balance_amount").value,
+    fullbill: structuredClone(bill)
+  };
 
-  autoTable(doc, roomRows, y);
-  y = doc.lastAutoTable.finalY + 30;
+  const tx = db.transaction("bills", "readwrite");
+  tx.objectStore("bills").put(data);
+}
 
-  /* VISITS */
-  if (bill.visits.length) {
-    sectionHeader(doc, "Consultant Visits", y);
-    y += 30;
+/* Load All Bills */
+function loadBillHistory() {
+  const tx = db.transaction("bills", "readonly");
+  const store = tx.objectStore("bills");
+  const req = store.getAll();
 
-    const visitRows = bill.visits.map(v => [
-      `Visit on ${v.date} (${v.count})`,
-      v.count * (+qs("#consultant_charge").value || 0)
-    ]);
+  req.onsuccess = () => renderHistory(req.result);
+}
 
-    autoTable(doc, visitRows, y);
-    y = doc.lastAutoTable.finalY + 30;
-  }
+/* Delete Bill */
+function deleteBill(billNo) {
+  const tx = db.transaction("bills", "readwrite");
+  tx.objectStore("bills").delete(billNo);
+  tx.oncomplete = loadBillHistory;
+}
 
-  /* SURGERIES */
-  if (bill.surgeries.length) {
-    sectionHeader(doc, "Surgical Procedures", y);
-    y += 20;
+/* ============================================================
+   RENDER BILL HISTORY TABLE
+============================================================ */
+function renderHistory(list) {
+  const body = qs("#historyTableBody");
+  if (!body) return;
 
-    bill.surgeries.forEach((surg, index) => {
-      doc.setFontSize(14);
-      doc.setFont("Helvetica", "bold");
-      doc.text(`${index + 1}. ${surg.name}`, left, y += 25);
+  body.innerHTML = "";
 
-      const subtotal =
-        surg.ot +
-        surg.surgeon +
-        surg.assistant +
-        surg.anesthetist +
-        surg.implant +
-        surg.gas +
-        surg.cons;
+  list.forEach(b => {
+    const tr = document.createElement("tr");
 
-      let discountLabel = "No Discount";
-      let finalAmount = subtotal;
+    tr.innerHTML = `
+      <td>${b.bill_no}</td>
+      <td>${b.patient}</td>
+      <td>${b.date}</td>
+      <td>${b.total}</td>
+      <td>${b.paid}</td>
+      <td>${b.balance}</td>
+      <td>
+        <button class="history-action-btn btn-view" onclick="openSavedBill('${b.bill_no}')">Open</button>
+        <button class="history-action-btn btn-pdf" onclick="exportSavedPDF('${b.bill_no}')">PDF</button>
+        <button class="history-action-btn btn-del" onclick="deleteBill('${b.bill_no}')">Delete</button>
+      </td>
+    `;
 
-      if (surg.mode === "50") {
-        discountLabel = "50% Package Applied";
-        finalAmount = subtotal * 0.5;
-      }
-      if (surg.mode === "custom") {
-        discountLabel = `${surg.custom}% Custom Discount`;
-        finalAmount = subtotal * (100 - surg.custom) / 100;
-      }
+    body.appendChild(tr);
+  });
+}
 
-      const surgRows = [
-        ["OT Charges", surg.ot],
-        ["Surgeon Fees", surg.surgeon],
-        ["Assistant Fees", surg.assistant],
-        ["Anesthetist Fees", surg.anesthetist],
-        ["Implant Charges", surg.implant],
-        ["OT Gas Charges", surg.gas],
-        ["Consumables", surg.cons],
-        ["Subtotal", subtotal],
-        ["Discount", discountLabel],
-        ["Final Surgery Total", finalAmount]
-      ];
+/* Load bill back to UI */
+function openSavedBill(billNo) {
+  const tx = db.transaction("bills", "readonly");
+  const store = tx.objectStore("bills");
+  const req = store.get(billNo);
 
-      autoTable(doc, surgRows, y + 5);
-      y = doc.lastAutoTable.finalY + 20;
-    });
-  }
+  req.onsuccess = () => {
+    const data = req.result;
 
-  /* PHARMACY */
-  sectionHeader(doc, "Pharmacy Charges", y);
-  y += 30;
+    // ✔ Restore fields
+    qs("#pt_name").value = data.fullbill.patient?.name ?? "";
+    qs("#pt_id").value = data.fullbill.patient?.id ?? "";
+    // (Continue for other fields…)
 
-  autoTable(doc, [["Pharmacy Total", +qs("#pharmacy_total").value]], y);
-  y = doc.lastAutoTable.finalY + 20;
+    bill = data.fullbill;
+    renderSurgeries();
+    renderInvestigations();
+    renderMisc();
+    renderReceipts();
+    calculateTotals();
 
-  if (bill.pharmacy.length) {
-    const pharmRows = bill.pharmacy.map(i => [
-      i.item,
-      i.qty,
-      i.amt
-    ]);
+    // Switch to New Bill panel
+    qs("[data-target='panel-newbill']").click();
+  };
+}
 
-    autoTable(doc, pharmRows, y, ["Item", "Qty", "Amount"]);
-    y = doc.lastAutoTable.finalY + 30;
-  }
+/* Export PDF of saved bill */
+function exportSavedPDF(billNo) {
+  const tx = db.transaction("bills", "readonly");
+  const store = tx.objectStore("bills");
+  const req = store.get(billNo);
 
-  /* INVESTIGATIONS */
-  if (bill.investigations.length) {
-    sectionHeader(doc, "Investigations", y);
-    y += 30;
-
-    const invRows = bill.investigations.map(i => [
-      i.name,
-      i.amt
-    ]);
-
-    autoTable(doc, invRows, y, ["Investigation", "Amount"]);
-    y = doc.lastAutoTable.finalY + 30;
-  }
-
-  /* MISC */
-  if (bill.misc.length) {
-    sectionHeader(doc, "Miscellaneous", y);
-    y += 30;
-
-    const miscRows = bill.misc.map(i => [
-      i.desc,
-      i.amt
-    ]);
-
-    autoTable(doc, miscRows, y, ["Description", "Amount"]);
-    y = doc.lastAutoTable.finalY + 30;
-  }
-
-  /* RECEIPTS */
-  sectionHeader(doc, "Receipts", y);
-  y += 30;
-
-  const recRows = bill.receipts.map(r => [
-    r.no, r.date, r.mode, r.amt
-  ]);
-
-  autoTable(doc, recRows, y, ["Receipt No", "Date", "Mode", "Amount"]);
-  y = doc.lastAutoTable.finalY + 30;
-
-  /* FINAL SUMMARY */
-  sectionHeader(doc, "Final Summary", y);
-  y += 30;
-
-  const final = [
-    ["Gross Amount", qs("#gross_amount").value],
-    ["Total Received", qs("#total_receipts").value],
-    ["Balance Amount", qs("#balance_amount").value]
-  ];
-
-  autoTable(doc, final, y);
-  y = doc.lastAutoTable.finalY + 30;
-
-  /* AMOUNT IN WORDS */
-  const amountWords = convertAmountToWords(+qs("#balance_amount").value);
-  doc.setFontSize(12);
-  doc.text(`Amount in Words: ${amountWords}`, left, y);
-
-  doc.save(`KCC_Final_Bill_${qs("#bill_no").value}.pdf`);
+  req.onsuccess = () => {
+    bill = req.result.fullbill;
+    qs("#bill_no").value = billNo;
+    generatePremiumPDF();
+  };
 }
 
 /* ============================================================
@@ -761,3 +997,4 @@ qs("#generatePDF").onclick = () => {
   calculateTotals();
   generatePremiumPDF();
 };
+
