@@ -584,3 +584,35 @@ html[data-theme="dark"] .btn.primary-btn {
   background: var(--primary);
 }
 
+.tariff-card {
+  background: var(--panel-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.tariff-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tariff-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.tariff-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.tariff-breakup div {
+  font-size: 13px;
+  margin: 4px 0;
+  color: var(--text-light);
+}
